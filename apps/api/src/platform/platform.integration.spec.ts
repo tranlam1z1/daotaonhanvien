@@ -197,6 +197,34 @@ integration('T07 platform management and database boundaries', () => {
     ).rejects.toThrow(/permission denied/i);
   });
 
+  it('restricts platform totals and staff audit to the platform and returns aggregate data', async () => {
+    await api('get', 'summary', tenantCookie).expect(403);
+    await api('get', 'audit', tenantCookie).expect(403);
+    const summary = await api('get', 'summary', platformCookie).expect(200);
+    expect(summary.body).toEqual({
+      companies: expect.any(Number),
+      activeAccounts: expect.any(Number),
+      storageBytes: expect.stringMatching(/^\d+$/),
+      expiringSubscriptions: expect.any(Number),
+    });
+    expect(summary.body.companies).toBeGreaterThanOrEqual(2);
+    expect(summary.body.activeAccounts).toBeGreaterThanOrEqual(2);
+
+    const audit = await api('get', 'audit', platformCookie).expect(200);
+    expect(audit.body.items).toContainEqual(
+      expect.objectContaining({
+        action: 'LOGIN',
+        user: { fullName: 'Quản trị nền tảng' },
+      }),
+    );
+    expect(
+      audit.body.items.every(
+        (entry: { user: { fullName: string } | null }) =>
+          entry.user?.fullName !== a.users[0].fullName,
+      ),
+    ).toBe(true);
+  });
+
   it('creates and audits the first ADM, delivers the invite after commit, and enforces suspension', async () => {
     const data = companyInput();
     const created = await api('post', 'companies')

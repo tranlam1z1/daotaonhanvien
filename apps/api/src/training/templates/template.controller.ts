@@ -14,9 +14,11 @@ import { AuthOriginGuard, type SessionRequest } from '../../auth/auth-http';
 import { RequirePermission } from '../../auth/authorization.guard';
 import { idInput, object } from '../../knowledge/knowledge-input';
 import { editorContext } from '../../knowledge/knowledge.service';
+import { UseManualTenantTransaction } from '../../tenant/tenant.interceptor';
 import { TenantDatabase } from '../../tenant/tenant-database';
 import { TrainingService } from '../training.service';
-import { onboardingRelease } from './template-fixture';
+import { TemplateUpdatesService } from './template-updates.service';
+import { TemplateReleasesService } from './template-releases.service';
 import { selectTemplate, type TemplateLevel } from './template-selection';
 
 function templateLevel(level: string): TemplateLevel {
@@ -41,14 +43,65 @@ export class TrainingTemplateController {
   constructor(
     @Inject(TrainingService) private readonly training: TrainingService,
     @Inject(TenantDatabase) private readonly database: TenantDatabase,
+    @Inject(TemplateReleasesService)
+    private readonly releases: TemplateReleasesService,
+    @Inject(TemplateUpdatesService)
+    private readonly updates: TemplateUpdatesService,
   ) {}
 
   @Get()
   @RequirePermission('templates.apply', async (_db, { user }) =>
     editorContext(user!),
   )
-  catalog() {
-    return onboardingRelease;
+  async catalog() {
+    return (await this.releases.latest())[0];
+  }
+
+  @Get('releases')
+  @RequirePermission('templates.apply', async (_db, { user }) =>
+    editorContext(user!),
+  )
+  listReleases() {
+    return this.releases.latest();
+  }
+
+  @Get('platform/releases')
+  @UseManualTenantTransaction()
+  @RequirePermission('platform.manage')
+  platformCatalog() {
+    return this.database.runPlatform(null, () => this.releases.latest());
+  }
+
+  @Post('releases')
+  @UseManualTenantTransaction()
+  @UseGuards(AuthOriginGuard)
+  @RequirePermission('platform.manage')
+  publish(@Body() body: unknown, @Req() request: SessionRequest) {
+    return this.releases.publish(body, request.user!.id, request.ip);
+  }
+
+  @Get('updates/:courseId')
+  @RequirePermission('templates.apply', async (_db, { user }) =>
+    editorContext(user!),
+  )
+  listUpdates(
+    @Req() { user }: SessionRequest,
+    @Param('courseId') courseId: string,
+  ) {
+    return this.updates.list(user!, idInput(courseId));
+  }
+
+  @Post('updates/:courseId')
+  @UseGuards(AuthOriginGuard)
+  @RequirePermission('templates.apply', async (_db, { user }) =>
+    editorContext(user!),
+  )
+  applyUpdate(
+    @Req() { user }: SessionRequest,
+    @Param('courseId') courseId: string,
+    @Body() body: unknown,
+  ) {
+    return this.updates.apply(user!, idInput(courseId), body);
   }
 
   @Post(':level/:id/copy')
@@ -67,7 +120,11 @@ export class TrainingTemplateController {
     @Param('id') id: string,
     @Body() body: unknown,
   ) {
-    const selection = selectTemplate(templateLevel(level), id);
+    const programId = object(body).programId;
+    const selections = (await this.releases.latest())
+      .filter(({ program }) => programId == null || program.id === programId)
+      .map((release) => selectTemplate(templateLevel(level), id, release));
+    const selection = selections.find((item) => item !== null);
     if (!selection)
       throw new NotFoundException('Không tìm thấy mục mẫu đã phát hành.');
 

@@ -24,13 +24,13 @@ type TemplateProgram = {
   name: string;
   description: string;
   audience: string;
-  type: 'ONBOARDING';
+  type: 'ONBOARDING' | 'SPECIALIST';
   targetDuration: number;
-  targetUnit: 'HOURS';
+  targetUnit: 'HOURS' | 'DAYS';
   courses: readonly TemplateCourse[];
 };
 
-type TemplateRelease = {
+export type TemplateRelease = {
   version: string;
   program: TemplateProgram;
 };

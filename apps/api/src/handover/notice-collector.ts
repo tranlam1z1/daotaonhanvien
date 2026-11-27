@@ -11,6 +11,7 @@ import { can } from '../auth/permissions';
 import { bytesPerStorageGb } from '../files/file-policy';
 import { readConfig } from '../organization/organization-input';
 import { TenantDatabase } from '../tenant/tenant-database';
+import { onboardingRelease } from '../training/templates/template-fixture';
 import { NoticeEmail } from './notice-email';
 
 const checkIntervalMs = 60_000;
@@ -88,6 +89,7 @@ export class NoticeCollector implements OnModuleInit, OnModuleDestroy {
       rejections,
       trainingRejections,
       subscription,
+      outdatedTemplates,
     ] = await Promise.all([
       db.enrollment.findMany({
         where: { tenantId, status: { not: 'CANCELLED' } },
@@ -183,6 +185,31 @@ export class NoticeCollector implements OnModuleInit, OnModuleDestroy {
           plan: { select: { maxAccounts: true, storageGb: true } },
         },
       }),
+      db.$queryRaw<{ version: string; name: string; departmentId: string | null }[]>`
+        WITH latest AS (
+          SELECT DISTINCT ON (program_id) program_id, version, content
+          FROM training_template_releases ORDER BY program_id, sequence DESC
+        ), origins AS (
+          SELECT version, program_id FROM training_template_releases
+          UNION ALL SELECT ${onboardingRelease.version}, ${onboardingRelease.program.id}
+        ), copies AS (
+          SELECT department_id, template_source FROM training_programs WHERE tenant_id = ${tenantId}::uuid
+          UNION ALL SELECT department_id, template_source FROM training_courses WHERE tenant_id = ${tenantId}::uuid
+          UNION ALL SELECT c.department_id, m.template_source FROM training_modules m
+            JOIN training_courses c ON c.tenant_id = m.tenant_id AND c.id = m.course_id
+            WHERE m.tenant_id = ${tenantId}::uuid
+          UNION ALL SELECT c.department_id, l.template_source FROM training_lessons l
+            JOIN training_modules m ON m.tenant_id = l.tenant_id AND m.id = l.module_id
+            JOIN training_courses c ON c.tenant_id = m.tenant_id AND c.id = m.course_id
+            WHERE l.tenant_id = ${tenantId}::uuid
+        )
+        SELECT DISTINCT latest.version, latest.content->>'name' AS name, copies.department_id AS "departmentId"
+        FROM copies JOIN origins ON origins.version = copies.template_source->>'sourceVersion'
+        JOIN latest ON latest.program_id = origins.program_id
+        WHERE latest.version <> origins.version
+          AND jsonb_path_exists(latest.content, '$.**.id ? (@ == $id)',
+            jsonb_build_object('id', copies.template_source->>'sourceItemId'))
+      `,
     ]);
     for (const row of enrollments) {
       const key = `training:${row.id}`;
@@ -300,6 +327,15 @@ export class NoticeCollector implements OnModuleInit, OnModuleDestroy {
           `content:${type}:${row.id}:rejected`,
           `Nội dung ${row.title} bị từ chối. Lý do: ${row.reason}`,
         );
+    for (const { id, roles } of reviewers) {
+      for (const template of outdatedTemplates) {
+        if (roles.some(({ role, departmentIds }) =>
+          role === 'ADM' || (role === 'PTDT' && template.departmentId !== null && departmentIds.includes(template.departmentId)),
+        )) {
+          add(id, `content:template:${template.version}`, `Bộ mẫu ${template.name} có phiên bản mới.`);
+        }
+      }
+    }
     if (subscription) {
       const remaining = localDay(subscription.endsAt) - today;
       const accounts = await db.user.count({

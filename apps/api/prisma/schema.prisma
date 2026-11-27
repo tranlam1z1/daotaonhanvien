@@ -895,3 +895,18 @@ model AssignmentRule {
   @@index([tenantId, enabled])
   @@map("assignment_rules")
 }
+
+model TrainingTemplateRelease {
+  sequence      Int      @id @default(autoincrement())
+  version       String   @unique
+  programId     String   @map("program_id")
+  industry      String
+  positionGroup String   @map("position_group")
+  notes         String
+  content       Json
+  questions     Json     @default("[]")
+  publishedAt   DateTime @default(now()) @map("published_at") @db.Timestamptz(3)
+
+  @@index([programId, sequence])
+  @@map("training_template_releases")
+}

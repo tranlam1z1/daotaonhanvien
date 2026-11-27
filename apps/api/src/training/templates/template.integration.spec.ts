@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import 'reflect-metadata';
 import 'dotenv/config';
 import type { INestApplication } from '@nestjs/common';
@@ -7,6 +8,7 @@ import { hash } from 'argon2';
 import request from 'supertest';
 import { AppModule } from '../../app.module';
 import { webOrigin } from '../../auth/auth-policy';
+import { NoticeCollector } from '../../handover/notice-collector';
 import { LeadInfrastructure } from '../../leads/leads.infrastructure';
 import {
   createTenantFixture,
@@ -18,6 +20,9 @@ const integration =
 const password = 'TestPassword36!';
 const editor = '/training/editor';
 const library = '/training/templates';
+const platformId = randomUUID();
+const platformEmail = platformId + '@example.test';
+const templateId = 'template-' + randomUUID();
 
 integration('T17 training template copies', () => {
   const root = new PrismaClient();
@@ -61,6 +66,16 @@ integration('T17 training template copies', () => {
         departmentIds: [own.department.id],
       },
     });
+    await root.user.create({
+      data: {
+        id: platformId,
+        email: platformEmail,
+        passwordHash,
+        fullName: 'Quản trị mẫu',
+        status: 'ACTIVE',
+        roles: { create: { role: 'QTNT' } },
+      },
+    });
     const module = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(LeadInfrastructure)
       .useValue({})
@@ -86,6 +101,11 @@ integration('T17 training template copies', () => {
         await removeTenantFixture(root, fixture.tenantId);
       }
     } finally {
+      await root.$executeRaw`DELETE FROM training_template_releases WHERE program_id = ${templateId}`;
+      await root.authCredential.deleteMany({ where: { userId: platformId } });
+      await root.auditLog.deleteMany({ where: { userId: platformId } });
+      await root.userRole.deleteMany({ where: { userId: platformId } });
+      await root.user.deleteMany({ where: { id: platformId } });
       await app?.close();
       await root.$disconnect();
     }
@@ -404,5 +424,170 @@ integration('T17 training template copies', () => {
     );
     expect(await course(otherId, otherAdmin)).toEqual(otherCopy);
     expect((await api('get', library).expect(200)).body).toEqual(original);
+  });
+
+  it('publishes immutable releases and applies a module update in the owning tenant only', async () => {
+    const platform = await login(platformEmail);
+    const released = {
+      industry: 'Dịch vụ',
+      positionGroup: 'Nhân viên mới',
+      notes: 'Phiên bản đầu tiên',
+      program: {
+        id: templateId,
+        name: 'Hội nhập thử nghiệm',
+        description: 'Chương trình thử nghiệm',
+        audience: 'Nhân viên',
+        type: 'ONBOARDING',
+        targetDuration: 1,
+        targetUnit: 'HOURS',
+        courses: [
+          {
+            id: 'course-update',
+            name: 'Hội nhập',
+            description: 'Khóa học thử nghiệm',
+            modules: [
+              {
+                id: 'module-update',
+                name: 'Module gốc',
+                lessons: [
+                  {
+                    id: 'lesson-update',
+                    name: 'Bài gốc',
+                    body: 'Nội dung gốc',
+                    durationMinutes: 5,
+                  },
+                ],
+              },
+              {
+                id: 'module-unrelated',
+                name: 'Module khác',
+                lessons: [
+                  {
+                    id: 'lesson-unrelated',
+                    name: 'Bài khác',
+                    body: 'Nội dung khác',
+                    durationMinutes: 5,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    };
+    await api('post', library + '/releases')
+      .send(released)
+      .expect(403);
+    await api('post', library + '/releases', platform)
+      .send(released)
+      .expect(201);
+    const result = await api('post', library + '/course/course-update/copy')
+      .send({ programId: templateId })
+      .expect(201);
+    const id = result.body.courseIds[0] as string;
+    const original = await course(id);
+    await api('patch', editor + '/courses/' + id)
+      .send({
+        ...original,
+        modules: [
+          { ...original.modules[0], name: 'Module tùy chỉnh' },
+          original.modules[1],
+        ],
+      })
+      .expect(200);
+    await root.tenant.update({
+      where: { id: own.tenantId },
+      data: { config: { selfApproval: true } },
+    });
+    const edited = await course(id);
+    await api('post', editor + '/courses/' + id + '/workflow/publish')
+      .send({ revision: edited.revision })
+      .expect(200);
+    const before = await course(id);
+    expect(before.status).toBe('PUBLISHED');
+    const readerPath = '/training/read/courses/' + id;
+    const publishedBeforeUpdate = await api('get', readerPath, employee).expect(
+      200,
+    );
+    const [changed, sibling] = released.program.courses[0].modules;
+    changed.name = 'Module mẫu mới';
+    changed.lessons[0].body = 'Nội dung cập nhật';
+    sibling.name = 'Module khác cũng được cập nhật trong mẫu';
+    const next = await api('post', library + '/releases', platform)
+      .send({ ...released, notes: 'Cập nhật hai module' })
+      .expect(201);
+    const collector = app.get(NoticeCollector);
+    await collector.collectForTenant(own.tenantId);
+    await collector.collectForTenant(other.tenantId);
+    const eventKey = 'content:template:' + next.body.version;
+    const notices = await root.workspaceNotice.findMany({
+      where: { eventKey },
+    });
+    expect(
+      notices.map(({ tenantId, userId }) => ({ tenantId, userId })),
+    ).toEqual([{ tenantId: own.tenantId, userId: own.users[0].id }]);
+    await collector.collectForTenant(own.tenantId);
+    expect(await root.workspaceNotice.count({ where: { eventKey } })).toBe(1);
+    const updates = library + '/updates/' + id;
+    await api('get', updates, otherAdmin).expect(404);
+    const list = (await api('get', updates).expect(200)).body;
+    expect(list.changes).toContainEqual(
+      expect.objectContaining({
+        level: 'module',
+        id: before.modules[0].id,
+        customized: true,
+        notes: 'Cập nhật hai module',
+        version: next.body.version,
+      }),
+    );
+    const selection = {
+      id: before.modules[0].id,
+      level: 'module',
+      revision: list.revision,
+      version: next.body.version,
+    };
+    await api('post', updates, otherAdmin)
+      .send({ ...selection, action: 'replace' })
+      .expect(404);
+    await api('post', updates)
+      .send({ ...selection, action: 'keep' })
+      .expect(201);
+    expect(await course(id)).toEqual(before);
+    await api('post', updates)
+      .send({ ...selection, action: 'replace' })
+      .expect(201);
+    const draft = await course(id);
+    expect(draft.status).toBe('DRAFT');
+    expect(draft.modules[0]).toMatchObject({
+      id: before.modules[0].id,
+      name: 'Module mẫu mới',
+      templateSource: { sourceVersion: next.body.version, customized: false },
+      lessons: [
+        { id: before.modules[0].lessons[0].id, body: 'Nội dung cập nhật' },
+      ],
+    });
+    expect(draft.modules[1]).toEqual(before.modules[1]);
+    const stillPublished = await api('get', readerPath, employee).expect(200);
+    expect(stillPublished.body).toEqual(publishedBeforeUpdate.body);
+    const published = await root.trainingRelease.findUniqueOrThrow({
+      where: { id: stillPublished.body.versionId },
+    });
+    const publishedContent = published.content as { modules: unknown[] };
+    expect(publishedContent.modules[0]).toMatchObject({
+      name: 'Module tùy chỉnh',
+      lessons: [{ body: 'Nội dung gốc' }],
+    });
+    await api('post', updates)
+      .send({ ...selection, action: 'replace' })
+      .expect(409);
+    const stored = await root.$queryRaw<{ count: bigint }[]>`
+      SELECT count(*) FROM training_template_releases WHERE program_id = ${templateId}
+    `;
+    expect(stored[0].count).toBe(2n);
+    expect(
+      await root.auditLog.count({
+        where: { userId: platformId, action: 'PUBLISH_TRAINING_TEMPLATE' },
+      }),
+    ).toBe(2);
   });
 });

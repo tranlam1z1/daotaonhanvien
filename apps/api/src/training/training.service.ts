@@ -337,7 +337,7 @@ export class TrainingService {
     if (!department) throw invalidReference();
   }
 
-  private async loadCourse(actor: SessionIdentity, id: string) {
+  async loadCourse(actor: SessionIdentity, id: string) {
     const course = await this.db.trainingCourse.findUnique({
       where: { tenantId_id: { tenantId: actor.tenantId!, id } },
       include: courseDetails,
