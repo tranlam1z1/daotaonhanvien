@@ -7,6 +7,11 @@ import { EmployeeController } from './employees/employee.controller';
 import { EmployeeService } from './employees/employee.service';
 import { EmployeeQuotaMailer } from './employees/employee-quota';
 import { FilesModule } from './files/files.module';
+import { HandoverController } from './handover/handover.controller';
+import { NoticesController } from './handover/notices.controller';
+import { NoticeCollector } from './handover/notice-collector';
+import { NoticeEmail } from './handover/notice-email';
+import { ReportsController } from './handover/reports.controller';
 import { KnowledgeModule } from './knowledge/knowledge.module';
 import { LearningModule } from './learning/learning.module';
 import { LeadsController } from './leads/leads.controller';
@@ -41,6 +46,9 @@ export class HealthController {
     PlatformController,
     OrganizationController,
     EmployeeController,
+    HandoverController,
+    NoticesController,
+    ReportsController,
   ],
   providers: [
     LeadInfrastructure,
@@ -48,6 +56,8 @@ export class HealthController {
     OrganizationService,
     EmployeeService,
     EmployeeQuotaMailer,
+    NoticeCollector,
+    NoticeEmail,
   ],
 })
 export class AppModule {}

@@ -8,6 +8,8 @@ import { Workbook } from 'exceljs';
 import request from 'supertest';
 import { AppModule } from '../app.module';
 import { webOrigin } from '../auth/auth-policy';
+import { NoticeCollector } from '../handover/notice-collector';
+import { NoticeEmail } from '../handover/notice-email';
 import { LeadInfrastructure } from '../leads/leads.infrastructure';
 import * as smtp from '../smtp';
 import {
@@ -104,6 +106,22 @@ integration('T09 employee management', () => {
 
   afterAll(async () => {
     try {
+      if (own) {
+        await root.knowledgeVersion.deleteMany({
+          where: { tenantId: own.tenantId },
+        });
+        await root.knowledgeItem.deleteMany({
+          where: { tenantId: own.tenantId },
+        });
+      }
+      if (own)
+        await root.handoverCase.deleteMany({
+          where: { tenantId: own.tenantId },
+        });
+      if (other)
+        await root.handoverCase.deleteMany({
+          where: { tenantId: other.tenantId },
+        });
       if (own) await removeTenantFixture(root, own.tenantId);
       if (other) await removeTenantFixture(root, other.tenantId);
       if (planId) await root.plan.delete({ where: { id: planId } });
@@ -393,5 +411,220 @@ integration('T09 employee management', () => {
         },
       }),
     ).toBe(2);
+  });
+  it('starts a single handover and rejects another tenant and unauthorized employees', async () => {
+    const employeeId = own.users[1].id;
+    const route = `/${employeeId}/handover`;
+    const input = { departureOn: '15/12/2030' };
+    const foreignAdmin = await login(other.users[0].email);
+    await root.user.update({
+      where: { id: employeeId },
+      data: { managerId: own.users[0].id },
+    });
+    await api('post', route, foreignAdmin).send(input).expect(403);
+    await api('post', route, employee).send(input).expect(403);
+    await api('post', route)
+      .send({ ...input, tenantId: other.tenantId })
+      .expect(400);
+    const started = await api('post', route).send(input).expect(201);
+    expect(started.body).toMatchObject({
+      employeeId,
+      departureOn: '2030-12-15T00:00:00.000Z',
+    });
+    const retry = await api('post', route).send(input).expect(201);
+    expect(retry.body.id).toBe(started.body.id);
+    expect(
+      await root.auditLog.count({
+        where: { objectId: started.body.id, action: 'handover.start' },
+      }),
+    ).toBe(1);
+    await api('post', `/${employeeId}/disable`).send({}).expect(400);
+    const caseId = started.body.id as string;
+    const recipientId = own.users[2].id;
+    const recipient = await login(own.users[2].email);
+    const http = (method: 'get' | 'post', path: string, cookie = admin) =>
+      request(app.getHttpServer())
+        [method](path)
+        .set('Origin', webOrigin())
+        .set('Cookie', cookie);
+    const action = (name: string, cookie = admin) =>
+      http('post', `/handovers/${caseId}/actions/${name}`, cookie);
+    const directory = (cookie = admin) => http('get', '/handovers', cookie);
+    expect((await directory(foreignAdmin).expect(200)).body.cases).toEqual([]);
+    await action('submit', foreignAdmin).send({ items: [] }).expect(404);
+    const items = [
+      {
+        category: 'EXPERIENCE',
+        title: 'Bàn giao quy trình',
+        description: 'Nội dung <thử nghiệm>',
+        recipientId,
+      },
+    ];
+    await action('submit').send({ items }).expect(400);
+    await action('submit')
+      .send({ items, substituteReason: 'Nhân viên nhờ lập thay' })
+      .expect(201);
+    await action('complete').send({}).expect(409);
+    const submitted = (await directory(recipient).expect(200)).body.cases[0];
+    expect(submitted.items).toHaveLength(1);
+    const itemId = submitted.items[0].id as string;
+    await action('accept', employee).send({ itemId }).expect(403);
+    await action('reject', recipient).send({ itemId }).expect(400);
+    await action('reject', recipient)
+      .send({ itemId, reason: 'Bổ sung thông tin' })
+      .expect(201);
+    const rejected = (await directory().expect(200)).body.cases[0];
+    expect(rejected).toMatchObject({
+      status: 'REVISION',
+      substituteReason: 'Nhân viên nhờ lập thay',
+      items: [{ reason: 'Bổ sung thông tin' }],
+    });
+    await action('submit')
+      .send({ items, substituteReason: 'Đã bổ sung thông tin' })
+      .expect(201);
+    const corrected = (await directory(recipient).expect(200)).body.cases[0]
+      .items[0].id as string;
+    await action('accept', recipient).send({ itemId: corrected }).expect(201);
+    await action('draft').send({ itemId: corrected }).expect(201);
+    const draft = await root.knowledgeVersion.findFirstOrThrow({
+      where: { tenantId: own.tenantId, title: items[0].title },
+    });
+    expect(draft).toMatchObject({
+      status: 'DRAFT',
+      bodyHtml: '<p>Nội dung &lt;thử nghiệm&gt;</p>',
+    });
+    await action('complete').send({}).expect(201);
+    await action('submit')
+      .send({ items, substituteReason: 'Đã đóng hồ sơ' })
+      .expect(409);
+    await http('get', '/me', employee).expect(401);
+    const notices = (await http('get', '/notices', recipient).expect(200)).body;
+    const noticeId = notices[0].id as string;
+    await http('post', `/notices/${noticeId}/read`, foreignAdmin).expect(201);
+    expect(
+      (await http('get', '/notices', recipient).expect(200)).body[0].readAt,
+    ).toBeNull();
+    await http('post', `/notices/${noticeId}/read`, recipient).expect(201);
+    expect(
+      (await http('get', '/notices', recipient).expect(200)).body[0].readAt,
+    ).not.toBeNull();
+    const reportPath = `/reports?employeeId=${employeeId}`;
+    expect(
+      (await http('get', reportPath, foreignAdmin).expect(200)).body.cases,
+    ).toEqual([]);
+    expect(
+      (await http('get', reportPath).expect(200)).body.cases,
+    ).toMatchObject([{ id: caseId, status: 'Hoàn tất' }]);
+    const exported = await http(
+      'get',
+      `/reports/export?employeeId=${employeeId}`,
+    )
+      .buffer(true)
+      .parse((response, callback) => {
+        const chunks: Buffer[] = [];
+        response.on('data', (chunk: Buffer) => chunks.push(chunk));
+        response.on('end', () => callback(null, Buffer.concat(chunks)));
+      })
+      .expect(200);
+    const workbook = new Workbook();
+    await workbook.xlsx.load(exported.body);
+    expect(workbook.getWorksheet('Bàn giao')?.getCell('C2').value).toBe(
+      'Hoàn tất',
+    );
+  });
+  it('sends only generic notice email within the tenant and respects optional groups', async () => {
+    const recipient = own.users[2];
+    const cookie = await login(recipient.email);
+    const preferences = () =>
+      request(app.getHttpServer())
+        .patch('/notices/preferences')
+        .set('Origin', webOrigin())
+        .set('Cookie', cookie);
+    await preferences().send(['handover']).expect(400);
+    await preferences().send(['training']).expect(200, ['training']);
+    await root.workspaceNotice.updateMany({
+      where: { tenantId: own.tenantId },
+      data: { emailHandledAt: new Date() },
+    });
+    const notice = (tenantId: string, userId: string, eventKey: string) => ({
+      tenantId,
+      userId,
+      eventKey,
+      message: 'Chi tiết nghiệp vụ riêng tư',
+    });
+    await root.workspaceNotice.createMany({
+      data: [
+        notice(own.tenantId, recipient.id, 'training:test:assigned'),
+        notice(other.tenantId, other.users[2].id, 'handover:test:start'),
+      ],
+    });
+    const mailer = app.get(NoticeEmail);
+    sendMail.mockClear();
+    await mailer.deliver(own.tenantId);
+    expect(sendMail).not.toHaveBeenCalled();
+    await root.workspaceNotice.createMany({
+      data: [
+        notice(own.tenantId, recipient.id, 'handover:test:start'),
+        notice(own.tenantId, recipient.id, 'training:test:overdue:date'),
+      ],
+    });
+    await Promise.all([
+      mailer.deliver(own.tenantId),
+      mailer.deliver(own.tenantId),
+    ]);
+    expect(sendMail).toHaveBeenCalledTimes(1);
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: recipient.email,
+        subject: 'Thông báo EduCore36',
+        text: `Bạn có thông báo mới trên EduCore36\n${new URL('/dang-nhap', webOrigin()).href}`,
+      }),
+    );
+    await mailer.deliver(own.tenantId);
+    expect(sendMail).toHaveBeenCalledTimes(1);
+  });
+  it('limits a departing employee to handover after the deadline and requires a no-item explanation', async () => {
+    const user = own.users[2];
+    const cookie = await login(user.email);
+    await api('post', `/${own.users[0].id}/handover`)
+      .send({ departureOn: '01/01/2020' })
+      .expect(409);
+    const started = await api('post', `/${user.id}/handover`)
+      .send({ departureOn: '01/01/2020' })
+      .expect(201);
+    const profile = await request(app.getHttpServer())
+      .get('/me')
+      .set('Cookie', cookie)
+      .expect(200);
+    const permissions = profile.body.permissions.map(
+      ({ permission }: { permission: string }) => permission,
+    );
+    expect(permissions).toContain('handover.prepare');
+    expect(permissions).not.toContain('learning.use');
+    const collector = app.get(NoticeCollector);
+    await collector.collectForTenant(own.tenantId);
+    await collector.collectForTenant(own.tenantId);
+    expect(
+      await root.workspaceNotice.count({
+        where: {
+          tenantId: own.tenantId,
+          userId: user.id,
+          eventKey: `handover:${started.body.id}:overdue`,
+        },
+      }),
+    ).toBe(1);
+    const action = (name: string, session: string) =>
+      request(app.getHttpServer())
+        .post(`/handovers/${started.body.id}/actions/${name}`)
+        .set('Origin', webOrigin())
+        .set('Cookie', session);
+    await action('submit', cookie).send({ items: [] }).expect(400);
+    await action('submit', cookie)
+      .send({ items: [], explanation: 'Chưa được giao công việc cần bàn giao' })
+      .expect(201, { status: 'REVIEW' });
+    await action('complete', cookie).send({}).expect(403);
+    await action('complete', admin)
+      .send({})
+      .expect(201, { status: 'COMPLETED' });
   });
 });

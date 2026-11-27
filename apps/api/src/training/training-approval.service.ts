@@ -340,12 +340,20 @@ export class TrainingApprovalService {
       rejectionReason: reason,
     });
     if (reason) {
-      await this.db.trainingRejection.create({
+      const rejection = await this.db.trainingRejection.create({
         data: {
           tenantId,
           userId: record.authorId!,
           title: record.name,
           reason,
+        },
+      });
+      await this.db.workspaceNotice.create({
+        data: {
+          tenantId,
+          userId: record.authorId!,
+          eventKey: `content:training:${rejection.id}:rejected`,
+          message: `Nội dung đào tạo bị từ chối · ${record.name}\n${reason}`,
         },
       });
     } else {

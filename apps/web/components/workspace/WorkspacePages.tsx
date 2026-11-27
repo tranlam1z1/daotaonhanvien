@@ -18,9 +18,10 @@ import { Training } from '../training/Training';
 import { TrainingReviews } from '../training/TrainingReviews';
 import { EmptyState } from '../ui/controls';
 import { useAccount } from './WorkspaceShell';
+import { Handovers, TrainingReports } from './StageThree';
 
 export function WorkspaceHome() {
-  const { profile } = useAccount();
+  const { profile, permissions } = useAccount();
   return (
     <div className="mx-auto max-w-5xl">
       <h1 className="text-2xl font-bold text-navy-900 sm:text-3xl">
@@ -37,6 +38,14 @@ export function WorkspaceHome() {
           Xem hồ sơ cá nhân
         </Link>
       </section>
+      {permissions.some(
+        ({ permission, scope }) =>
+          permission === 'training.report' && scope !== 'self',
+      ) && (
+        <div className="mt-5">
+          <TrainingReports summaryOnly />
+        </div>
+      )}
     </div>
   );
 }
@@ -95,6 +104,10 @@ export function WorkspaceSection({
         </>
       ) : slug === 'thuc-hanh' ? (
         <Practice />
+      ) : slug === 'ban-giao' ? (
+        <Handovers />
+      ) : slug === 'bao-cao-dao-tao' ? (
+        <TrainingReports />
       ) : slug === 'to-chuc' ? (
         <Organization
           editable={permissions.some(

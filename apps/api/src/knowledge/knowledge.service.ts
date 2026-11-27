@@ -499,8 +499,8 @@ export class KnowledgeService {
       },
       select: versionFields,
     });
-    if (reason)
-      await this.db.knowledgeRejection.create({
+    if (reason) {
+      const rejection = await this.db.knowledgeRejection.create({
         data: {
           tenantId,
           userId: version.createdBy,
@@ -509,6 +509,15 @@ export class KnowledgeService {
           reason,
         },
       });
+      await this.db.workspaceNotice.create({
+        data: {
+          tenantId,
+          userId: version.createdBy,
+          eventKey: `content:knowledge:${rejection.id}:rejected`,
+          message: `Nội dung tri thức bị từ chối · ${version.title}\n${reason}`,
+        },
+      });
+    }
     await this.db.auditLog.create({
       data: {
         tenantId,

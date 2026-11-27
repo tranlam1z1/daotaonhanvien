@@ -40,14 +40,17 @@ export class FilesService {
     actor: SessionIdentity,
     file: DiskUpload,
     departmentId: unknown,
+    handoverId?: string,
   ) {
     const tenantId = actor.tenantId;
     if (!tenantId)
       throw new ForbiddenException('Bạn không có quyền tải tệp lên.');
     const metadata = await validateFile(file);
-    await this.database.run(tenantId, () =>
-      this.checkQuota(tenantId, metadata.sizeBytes),
-    );
+    await this.database.run(tenantId, async () => {
+      if (handoverId)
+        await this.checkHandoverUpload(actor, tenantId, handoverId);
+      await this.checkQuota(tenantId, metadata.sizeBytes);
+    });
     const searchText = await extractDocumentText(file.path, metadata);
 
     const id = randomUUID();
@@ -72,7 +75,9 @@ export class FilesService {
         const db = this.database.client;
         // Subscription changes and successful concurrent uploads share this tenant row lock.
         await db.$queryRaw`SELECT id FROM tenants WHERE id = ${tenantId}::uuid FOR UPDATE`;
-        await this.checkUploader(actor.id, tenantId, departmentId);
+        if (handoverId)
+          await this.checkHandoverUpload(actor, tenantId, handoverId);
+        else await this.checkUploader(actor.id, tenantId, departmentId);
         await this.checkQuota(tenantId, metadata.sizeBytes);
         const record = await db.fileObject.create({
           data: {
@@ -173,6 +178,47 @@ export class FilesService {
       )
     )
       throw new ForbiddenException('Bạn không có quyền tải tệp lên.');
+  }
+
+  private async checkHandoverUpload(
+    actor: SessionIdentity,
+    tenantId: string,
+    id: string,
+  ) {
+    const db = this.database.client;
+    const [record, uploader] = await Promise.all([
+      db.handoverCase.findFirst({
+        where: { id, tenantId, completedAt: null },
+        select: {
+          workflow: true,
+          employee: { select: { id: true, managerId: true } },
+        },
+      }),
+      db.user.findFirst({
+        where: {
+          id: actor.id,
+          tenantId,
+          status: { in: ['ACTIVE', 'HANDOVER'] },
+          invitationRequired: false,
+          deletedAt: null,
+        },
+        select: { id: true },
+      }),
+    ]);
+    const state = record?.workflow;
+    const status =
+      state && typeof state === 'object' && !Array.isArray(state)
+        ? (state.status ?? 'DRAFT')
+        : 'DRAFT';
+    if (
+      !record ||
+      !uploader ||
+      (status !== 'DRAFT' && status !== 'REVISION') ||
+      !can(actor, 'handover.prepare', { tenantId, employee: record.employee })
+    )
+      throw new ForbiddenException(
+        'Bạn không có quyền đính kèm tệp vào hồ sơ này.',
+      );
   }
 
   private async checkQuota(tenantId: string, size: bigint) {

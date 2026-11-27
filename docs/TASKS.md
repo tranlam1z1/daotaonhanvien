@@ -297,6 +297,30 @@ T18, T21 và T22 có thể bắt đầu song song. T19 và T23 dùng chung cấu
 - Cho doanh nghiệp chỉnh mẫu mặc định và nhân viên đã hoàn thành khóa học gửi khảo sát tùy chọn.
 - **Hoàn thành khi** quyền quản lý mẫu và gửi khảo sát đúng phạm vi, phản hồi gắn đúng lượt học và trạng thái hoàn thành không phụ thuộc khảo sát.
 
+## Giai đoạn 3 — Bàn giao và vận hành
+
+## ☑ T27 — Bàn giao tri thức
+
+**FR/AC:** FR-03.06, FR-04.08, FR-10.01–10.08, AC-10–12, BR-006, BR-010, BR-015, D-13–16.
+
+- Đánh dấu nghỉ việc, lập hoặc lập thay hồ sơ, đính kèm tệp, tiếp nhận từng hạng mục, yêu cầu bổ sung và xác nhận hoàn tất. Tạo bản nháp tri thức từ hạng mục kinh nghiệm đã tiếp nhận.
+- **Kiểm tra thủ công** tại **Bàn giao**. Tạo hồ sơ với một hạng mục, đổi sang tài khoản người nhận để từ chối rồi tiếp nhận bản đã bổ sung. Quay lại bằng tài khoản quản lý trực tiếp hoặc ADM để xác nhận và kiểm tra tài khoản nghỉ việc đã bị vô hiệu hóa.
+- Khi không cấu hình số ngày bàn giao, hệ thống lấy ngày nghỉ việc làm hạn. Quyền trong phiên được giới hạn vào ngày nghỉ việc hoặc sau hạn bàn giao, tùy thời điểm nào đến trước.
+
+## ☑ T28 — Thông báo trong ứng dụng và email
+
+**FR/AC:** FR-11.01–11.06, AC-04, AC-10.
+
+- Xem chuông thông báo, đánh dấu đã đọc và cấu hình nhóm email tùy chọn. Email chỉ chứa lời báo có thông báo mới và liên kết đăng nhập. Chi tiết sự kiện nằm trong ứng dụng.
+- **Kiểm tra thủ công** bằng cách tạo hồ sơ bàn giao, mở chuông bằng tài khoản người nhận và kiểm tra bản xem trước email trên Mailpit cục bộ nếu đã cấu hình SMTP.
+
+## ☑ T29 — Tổng quan và báo cáo đào tạo
+
+**FR/AC:** FR-09.01–09.08, AC-09, AC-14.
+
+- Xem tiến độ, kết quả kiểm tra, khảo sát và trạng thái bàn giao theo quyền. Cùng truy vấn lọc được dùng cho màn hình và tệp Excel.
+- **Kiểm tra thủ công** tại **Báo cáo đào tạo**. Lọc phòng ban, khóa học và thời gian, đối chiếu lượt học với danh sách phân bổ, rồi xuất Excel và đối chiếu các dòng trong trang tính **Tiến độ**.
+
 ## Phụ thuộc theo giai đoạn
 
 - **Giai đoạn 3:** nối FR-04.08 với FR-10.07 để hạng mục bàn giao được đánh dấu chuyển thành Nháp tri thức. F11 mở rộng thông báo sau phần thông báo từ chối cần cho AC-04.
