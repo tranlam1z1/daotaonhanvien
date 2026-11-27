@@ -55,6 +55,33 @@ html {
   content-visibility: auto;
   contain-intrinsic-size: auto 1000px;
 }
+@layer components {
+  .knowledge-rich {
+    overflow-wrap: anywhere;
+  }
+  .knowledge-rich :is(p, div, ul, ol, h2, h3, blockquote) + * {
+    margin-block-start: 0.5rem;
+  }
+  .knowledge-rich ul,
+  .knowledge-rich ol {
+    padding-inline-start: 1.5rem;
+  }
+  .knowledge-rich ul {
+    list-style: disc;
+  }
+  .knowledge-rich ol {
+    list-style: decimal;
+  }
+  .knowledge-rich :is(h2, h3) {
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+  .knowledge-rich blockquote {
+    border-inline-start: 3px solid var(--color-brand-blue);
+    padding-inline-start: 0.75rem;
+  }
+}
+
 /* The same 40px grid as the design, without a full-section SVG surface. */
 .hero-grid {
   opacity: 0.1;

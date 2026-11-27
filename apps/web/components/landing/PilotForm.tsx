@@ -23,12 +23,15 @@ export function PilotForm() {
     setError(null);
     setPending(true);
     try {
-      const response = await fetch('/api/public/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registration),
-        signal: AbortSignal.timeout(10000),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'}/public/leads`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(registration),
+          signal: AbortSignal.timeout(10000),
+        },
+      );
       if (!response.ok) throw new Error('Registration failed');
       setSubmitted(registration);
     } catch {

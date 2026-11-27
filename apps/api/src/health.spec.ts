@@ -3,12 +3,16 @@ import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from './app.module';
+import { LeadInfrastructure } from './leads/leads.infrastructure';
 describe('GET /health', () => {
   let app: INestApplication;
   beforeAll(async () => {
     const module = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(LeadInfrastructure)
+      .useValue({})
+      .compile();
     app = module.createNestApplication();
     await app.init();
   });
