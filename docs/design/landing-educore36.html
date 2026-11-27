@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduCore Thanh Hóa (TriThuc36) – Nền tảng Quản trị Tri thức & Đào tạo Nội bộ Doanh nghiệp</title>
+    <meta name="description" content="Giải pháp SaaS chuẩn hóa tài liệu nội bộ, tự động hóa đào tạo hội nhập và kiểm soát 100% quy trình bàn giao tri thức dành riêng cho doanh nghiệp tại Thanh Hóa.">
+
+    <!-- Google Fonts: Be Vietnam Pro & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Be Vietnam Pro"', '"Inter"', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            800: '#1E3A8A',
+                            900: '#0F172A',
+                            950: '#090D16',
+                        },
+                        brand: {
+                            blue: '#2563EB',
+                            orange: '#F97316',
+                            teal: '#0D9488',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(15, 23, 42, 0.08)',
+                        'card': '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-blue-600 selection:text-white overflow-x-hidden">
+
+    <!-- ==================== 1. HEADER / NAVBAR ==================== -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 md:h-20">
+                <!-- Logo & Brand -->
+                <a href="#" class="flex items-center gap-2.5 group focus:outline-none">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-navy-900 via-navy-800 to-brand-blue flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-2">
+                            <span class="font-extrabold text-lg sm:text-xl tracking-tight text-navy-900">EduCore<span class="text-brand-blue">36</span></span>
+                            <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-teal-50 text-brand-teal border border-teal-200">
+                                Phiên bản Pilot 1.0
+                            </span>
+                        </div>
+                        <span class="text-[11px] text-slate-500 font-medium hidden sm:block">TriThuc36 • Quản trị tri thức & Đào tạo</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <nav class="hidden lg:flex items-center gap-7 text-sm font-medium text-slate-600">
+                    <a href="#van-de-giai-phap" class="hover:text-brand-blue transition-colors py-2">Vấn đề & Giải pháp</a>
+                    <a href="#ba-tru-cot" class="hover:text-brand-blue transition-colors py-2">3 Trụ cột</a>
+                    <a href="#trai-nghiem-vai-tro" class="hover:text-brand-blue transition-colors py-2">Tính năng nổi bật</a>
+                    <a href="#diem-khac-biet" class="hover:text-brand-blue transition-colors py-2">Bảng giá minh bạch</a>
+                    <a href="#chuong-trinh-pilot" class="hover:text-brand-blue transition-colors py-2">Chương trình Pilot</a>
+                </nav>
+
+                <!-- Desktop CTA & Mobile Menu Button -->
+                <div class="flex items-center gap-3">
+                    <a href="#dang-ky-pilot" class="inline-flex items-center justify-center px-4 py-2.5 sm:px-5 sm:py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-orange hover:bg-orange-600 shadow-sm hover:shadow transition-all">
+                        Đăng ký dùng thử
+                    </a>
+
+                    <!-- Mobile Hamburger Button -->
+                    <button id="mobile-menu-btn" type="button" aria-label="Mở menu điều hướng" class="lg:hidden p-2.5 rounded-xl text-slate-600 hover:text-navy-900 hover:bg-slate-100 focus:outline-none">
+                        <svg id="menu-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown Navigation -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-5 space-y-1 shadow-lg">
+            <div class="pb-2 mb-2 border-b border-slate-100 flex items-center justify-between">
+                <span class="text-xs font-semibold text-brand-teal bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">Phiên bản Pilot 1.0 • Thanh Hóa</span>
+            </div>
+            <a href="#van-de-giai-phap" class="mobile-nav-link block px-3 py-2.5 rounded-xl text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue">Vấn đề & Giải pháp</a>
+            <a href="#ba-tru-cot" class="mobile-nav-link block px-3 py-2.5 rounded-xl text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue">3 Trụ cột cốt lõi</a>
+            <a href="#trai-nghiem-vai-tro" class="mobile-nav-link block px-3 py-2.5 rounded-xl text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue">Tính năng nổi bật</a>
+            <a href="#diem-khac-biet" class="mobile-nav-link block px-3 py-2.5 rounded-xl text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue">Bảng giá minh bạch</a>
+            <a href="#chuong-trinh-pilot" class="mobile-nav-link block px-3 py-2.5 rounded-xl text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-blue">Chương trình Pilot</a>
+        </div>
+    </header>
+
+    <!-- ==================== 2. HERO SECTION ==================== -->
+    <section class="relative bg-gradient-to-b from-navy-900 via-navy-900 to-navy-800 text-white pt-12 pb-20 lg:pt-20 lg:pb-28 overflow-hidden">
+        <!-- Subtle Geometric Background Pattern -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none">
+            <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid-pattern)" />
+            </svg>
+        </div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
+
+                <!-- Left Column: Copywriting & CTA -->
+                <div class="lg:col-span-6 space-y-6 text-left">
+                    <!-- Badge -->
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/15 border border-blue-400/30 text-blue-200 text-xs sm:text-sm font-medium">
+                        <span class="w-2 h-2 rounded-full bg-brand-orange animate-pulse"></span>
+                        <span>Giải pháp SaaS chuyên biệt cho doanh nghiệp tại Thanh Hóa</span>
+                    </div>
+
+                    <!-- Headline -->
+                    <h1 class="text-3xl sm:text-4xl lg:text-[44px] font-extrabold tracking-tight leading-[1.2] text-white">
+                        Đừng để chất xám doanh nghiệp rời đi cùng <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300">nhân sự nghỉ việc</span>
+                    </h1>
+
+                    <!-- Sub-headline -->
+                    <p class="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl">
+                        Chuẩn hóa tài liệu nội bộ, tự động hóa đào tạo hội nhập theo vị trí và kiểm soát 100% quy trình bàn giao tri thức chỉ trên một nền tảng duy nhất.
+                    </p>
+
+                    <!-- 2 CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-3.5 pt-2">
+                        <a href="#dang-ky-pilot" class="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl text-base font-bold text-white bg-brand-orange hover:bg-orange-600 shadow-lg shadow-orange-600/25 transition-all">
+                            <span>Đăng ký tham gia Pilot miễn phí</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            </svg>
+                        </a>
+                        <a href="#trai-nghiem-vai-tro" class="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl text-base font-semibold text-white bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-sm transition-all">
+                            <svg class="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            <span>Khám phá giao diện</span>
+                        </a>
+                    </div>
+
+                    <!-- Trust Indicators -->
+                    <div class="pt-4 border-t border-white/10 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs sm:text-sm text-slate-300">
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-teal-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>Sẵn bộ mẫu đào tạo chuẩn</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-teal-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>Không cần cài đặt ERP phức tạp</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-teal-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>Hỗ trợ trực tiếp tại Thanh Hóa</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Interactive Visual UI Mockup -->
+                <div class="lg:col-span-6">
+                    <div class="relative rounded-2xl bg-slate-900/90 border border-slate-700/80 p-4 sm:p-6 shadow-2xl backdrop-blur-md">
+                        <!-- Window Top Bar -->
+                        <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                                <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                                <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                                <span class="ml-2 text-xs font-medium text-slate-400">app.educore36.vn • Không gian Doanh nghiệp</span>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                Dữ liệu cách ly RLS
+                            </span>
+                        </div>
+
+                        <!-- Mockup Cards Stack -->
+                        <div class="space-y-4">
+                            <!-- Card 1: Onboarding Progress -->
+                            <div class="rounded-xl bg-white text-slate-800 p-4 shadow-md">
+                                <div class="flex items-start justify-between gap-2 mb-2.5">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-9 h-9 rounded-lg bg-blue-100 text-brand-blue flex items-center justify-center shrink-0">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-semibold text-brand-blue uppercase tracking-wider">Phân bổ tự động (BR-004)</p>
+                                            <h3 class="text-sm font-bold text-navy-900">Lộ trình Hội nhập Nhân viên Kinh doanh</h3>
+                                        </div>
+                                    </div>
+                                    <span class="text-sm font-extrabold text-brand-blue">85%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden mb-2">
+                                    <div class="bg-gradient-to-r from-brand-blue to-teal-500 h-2.5 rounded-full" style="width: 85%"></div>
+                                </div>
+                                <div class="flex items-center justify-between text-xs text-slate-500">
+                                    <span>Hoàn thành: 6/7 bài học • Điểm kiểm tra: 90/100</span>
+                                    <span class="text-emerald-600 font-semibold">Đúng hạn</span>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: Approval Workflow -->
+                            <div class="rounded-xl bg-white text-slate-800 p-4 shadow-md">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 text-brand-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        Quy trình phê duyệt Kho tri thức
+                                    </span>
+                                    <span class="text-[11px] font-medium text-slate-400">Phiên bản v2.1</span>
+                                </div>
+                                <!-- Workflow Steps -->
+                                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                                    <div class="py-2 px-2 rounded-lg bg-slate-100 text-slate-500 font-medium border border-slate-200">
+                                        1. Bản Nháp
+                                    </div>
+                                    <div class="py-2 px-2 rounded-lg bg-amber-50 text-amber-700 font-semibold border border-amber-200">
+                                        2. Chờ duyệt
+                                    </div>
+                                    <div class="py-2 px-2 rounded-lg bg-emerald-600 text-white font-bold shadow-sm">
+                                        3. Đã xuất bản ✓
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 3: Handover & Billing Sync -->
+                            <div class="rounded-xl bg-gradient-to-r from-slate-800 to-navy-900 border border-slate-700 p-4 text-white">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-semibold text-orange-300 flex items-center gap-1.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                                        </svg>
+                                        Kiểm soát Bàn giao Nghỉ việc (BR-006)
+                                    </span>
+                                    <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30">
+                                        100% Kế thừa
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-300 mb-2.5">
+                                    Nhân sự: <strong class="text-white">Lê Văn Minh</strong> (Phòng Kế toán) • 5/5 hạng mục đã tiếp nhận
+                                </p>
+                                <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700/80 text-[11px]">
+                                    <span class="text-emerald-400 font-semibold">● Quản lý trực tiếp đã xác nhận</span>
+                                    <span class="px-2 py-0.5 rounded bg-white/10 text-slate-200 font-medium">Tự động khóa TK & Ngưng tính phí</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 3. VẤN ĐỀ & GIẢI PHÁP (BEFORE VS AFTER) ==================== -->
+    <section id="van-de-giai-phap" class="py-16 sm:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-14">
+                <span class="text-xs font-bold uppercase tracking-widest text-brand-blue bg-blue-50 px-3 py-1.5 rounded-full">Bài toán thực tế tại doanh nghiệp</span>
+                <h2 class="mt-4 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-navy-900">
+                    Chấm dứt vòng luẩn quẩn "Tuyển mới – Đào tạo lại – Nghỉ việc mất dấu"
+                </h2>
+                <p class="mt-3 text-base text-slate-600">
+                    So sánh trực diện sự khác biệt giữa cách quản lý thủ công rời rạc và vận hành chuẩn hóa trên EduCore36.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+                <!-- BEFORE: Cách vận hành truyền thống rời rạc -->
+                <div class="rounded-2xl bg-slate-50 border border-slate-200 p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-11 h-11 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold uppercase text-rose-600 tracking-wider">Trước đây (Before)</span>
+                                <h3 class="text-xl font-bold text-slate-900">Cách vận hành truyền thống rời rạc</h3>
+                            </div>
+                        </div>
+
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3.5 p-4 rounded-xl bg-white border border-slate-200/80">
+                                <svg class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-sm sm:text-base">Tài liệu nằm rải rác trên Zalo, Drive cá nhân</h4>
+                                    <p class="text-sm text-slate-600 mt-1">Quy trình bị phân tán tại từng phòng ban, nhân viên không biết đâu là phiên bản mới nhất để áp dụng.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3.5 p-4 rounded-xl bg-white border border-slate-200/80">
+                                <svg class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-sm sm:text-base">Đào tạo nhân viên mới bằng cách "truyền miệng"</h4>
+                                    <p class="text-sm text-slate-600 mt-1">Mỗi lần có nhân sự mới gia nhập, quản lý và nhân sự cũ lại mất hàng tuần hướng dẫn lặp đi lặp lại cùng một nội dung.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3.5 p-4 rounded-xl bg-white border border-slate-200/80">
+                                <svg class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-sm sm:text-base">Nhân sự nghỉ việc mang theo toàn bộ kinh nghiệm</h4>
+                                    <p class="text-sm text-slate-600 mt-1">Bàn giao sơ sài qua tin nhắn hoặc file Word rời rạc; người tiếp nhận không xác nhận rõ ràng dẫn đến đứt gãy công việc.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- AFTER: Vận hành chuẩn hóa với nền tảng -->
+                <div class="rounded-2xl bg-gradient-to-br from-navy-900 to-navy-800 text-white p-6 sm:p-8 shadow-xl flex flex-col justify-between relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-11 h-11 rounded-xl bg-teal-500/20 text-teal-300 border border-teal-400/30 flex items-center justify-center shrink-0">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold uppercase text-teal-300 tracking-wider">Giải pháp (After)</span>
+                                <h3 class="text-xl font-bold text-white">Vận hành chuẩn hóa với EduCore36</h3>
+                            </div>
+                        </div>
+
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3.5 p-4 rounded-xl bg-white/10 border border-white/15 backdrop-blur-sm">
+                                <svg class="w-5 h-5 text-teal-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <div>
+                                    <h4 class="font-bold text-white text-sm sm:text-base">Kho tri thức tập trung, có phê duyệt & phiên bản</h4>
+                                    <p class="text-sm text-blue-100 mt-1">Tài liệu được phân quyền chặt chẽ theo phòng ban/chức danh, kiểm duyệt trước khi xuất bản và lưu lịch sử thay đổi.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3.5 p-4 rounded-xl bg-white/10 border border-white/15 backdrop-blur-sm">
+                                <svg class="w-5 h-5 text-teal-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <div>
+                                    <h4 class="font-bold text-white text-sm sm:text-base">Tự động giao khóa học ngay khi nhận việc / đổi vị trí</h4>
+                                    <p class="text-sm text-blue-100 mt-1">Hệ thống tự động phân bổ lộ trình đào tạo kèm hạn hoàn thành, bài kiểm tra trắc nghiệm và xác nhận thực hành.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3.5 p-4 rounded-xl bg-white/10 border border-white/15 backdrop-blur-sm">
+                                <svg class="w-5 h-5 text-teal-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <div>
+                                    <h4 class="font-bold text-white text-sm sm:text-base">Bắt buộc hoàn tất bàn giao trước khi khóa tài khoản</h4>
+                                    <p class="text-sm text-blue-100 mt-1">Người nhận và quản lý trực tiếp cùng xác nhận từng hạng mục; biến kinh nghiệm người cũ thành tài liệu cho người sau.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 4. BA TRỤ CỘT CỐT LÕI ==================== -->
+    <section id="ba-tru-cot" class="py-16 sm:py-24 bg-slate-50 border-y border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-14">
+                <span class="text-xs font-bold uppercase tracking-widest text-brand-teal bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-full">Kiến trúc nghiệp vụ khép kín</span>
+                <h2 class="mt-4 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-navy-900">
+                    3 Trụ cột bảo toàn và nhân bản tri thức doanh nghiệp
+                </h2>
+                <p class="mt-3 text-base text-slate-600">
+                    Quản lý trọn vẹn vòng đời tri thức từ lúc tạo lập, đào tạo đội ngũ cho đến khi bàn giao kế thừa.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Trụ cột 1 -->
+                <div class="bg-white rounded-2xl p-7 shadow-card border border-slate-200/80 hover:border-blue-300 hover:shadow-soft transition-all flex flex-col">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-50 text-brand-blue flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                    </div>
+                    <div class="text-xs font-bold text-brand-blue uppercase tracking-wider mb-1">Trụ cột 01</div>
+                    <h3 class="text-xl font-bold text-navy-900 mb-3">Quản trị tri thức tập trung</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed mb-6 flex-grow">
+                        Số hóa toàn bộ quy trình, biểu mẫu, tài liệu hướng dẫn (PDF, Word, Video) vào một kho lưu trữ duy nhất với cấu trúc cây danh mục khoa học.
+                    </p>
+                    <div class="pt-4 border-t border-slate-100 space-y-2.5 text-xs sm:text-sm font-medium text-slate-700">
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span>
+                            <span>Phân quyền truy cập theo phòng ban, chức danh</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span>
+                            <span>Quy trình phê duyệt chặt chẽ (Nháp → Xuất bản)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span>
+                            <span>Quản lý phiên bản, không gián đoạn người đọc</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trụ cột 2 -->
+                <div class="bg-white rounded-2xl p-7 shadow-card border border-slate-200/80 hover:border-teal-300 hover:shadow-soft transition-all flex flex-col">
+                    <div class="w-14 h-14 rounded-2xl bg-teal-50 text-brand-teal flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                        </svg>
+                    </div>
+                    <div class="text-xs font-bold text-brand-teal uppercase tracking-wider mb-1">Trụ cột 02</div>
+                    <h3 class="text-xl font-bold text-navy-900 mb-3">Đào tạo theo vị trí</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed mb-6 flex-grow">
+                        Cung cấp đúng kiến thức cho đúng người vào đúng thời điểm. Thiết kế lộ trình bài bản với cảnh báo tự động khi vượt quá thời lượng mục tiêu.
+                    </p>
+                    <div class="pt-4 border-t border-slate-100 space-y-2.5 text-xs sm:text-sm font-medium text-slate-700">
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
+                            <span>Cấu trúc 4 cấp: Chương trình → Khóa → Module → Bài</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
+                            <span>Tự động giao bài khi tạo nhân viên mới / đổi vị trí</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
+                            <span>Thi trắc nghiệm ngẫu nhiên & xác nhận thực hành</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trụ cột 3 -->
+                <div class="bg-white rounded-2xl p-7 shadow-card border border-slate-200/80 hover:border-orange-300 hover:shadow-soft transition-all flex flex-col">
+                    <div class="w-14 h-14 rounded-2xl bg-orange-50 text-brand-orange flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                        </svg>
+                    </div>
+                    <div class="text-xs font-bold text-brand-orange uppercase tracking-wider mb-1">Trụ cột 03</div>
+                    <h3 class="text-xl font-bold text-navy-900 mb-3">Bàn giao & Kế thừa tri thức</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed mb-6 flex-grow">
+                        Khóa chặt lỗ hổng thất thoát chất xám khi nhân sự biến động. Mọi nhân viên nghỉ việc đều phải hoàn tất hồ sơ bàn giao minh bạch.
+                    </p>
+                    <div class="pt-4 border-t border-slate-100 space-y-2.5 text-xs sm:text-sm font-medium text-slate-700">
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-orange"></span>
+                            <span>Khởi tạo hồ sơ bàn giao ngay khi báo nghỉ việc</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-orange"></span>
+                            <span>Người nhận & Quản lý trực tiếp cùng xác nhận</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-orange"></span>
+                            <span>Chuyển mục "Kinh nghiệm" thành tài liệu nháp</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 5. TRẢI NGHIỆM TƯƠNG TÁC THEO VAI TRÒ ==================== -->
+    <section id="trai-nghiem-vai-tro" class="py-16 sm:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <span class="text-xs font-bold uppercase tracking-widest text-brand-blue bg-blue-50 px-3 py-1.5 rounded-full">Giao diện thực tế theo phân quyền</span>
+                <h2 class="mt-4 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-navy-900">
+                    Thiết kế tinh gọn cho từng vai trò trong doanh nghiệp
+                </h2>
+                <p class="mt-3 text-base text-slate-600">
+                    Bấm chọn từng vai trò bên dưới để trải nghiệm góc nhìn và công cụ chuyên biệt trên hệ thống.
+                </p>
+            </div>
+
+            <!-- Role Tabs Navigation -->
+            <div class="flex flex-wrap justify-center gap-2.5 sm:gap-4 mb-10" role="tablist">
+                <button type="button" data-role="admin" class="role-tab-btn active px-5 py-3.5 rounded-xl text-sm sm:text-base font-bold transition-all flex items-center gap-2 bg-navy-900 text-white shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    <span>Giám đốc / Admin</span>
+                </button>
+
+                <button type="button" data-role="manager" class="role-tab-btn px-5 py-3.5 rounded-xl text-sm sm:text-base font-bold transition-all flex items-center gap-2 bg-slate-100 text-slate-700 hover:bg-slate-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span>Quản lý trực tiếp / Đào tạo</span>
+                </button>
+
+                <button type="button" data-role="employee" class="role-tab-btn px-5 py-3.5 rounded-xl text-sm sm:text-base font-bold transition-all flex items-center gap-2 bg-slate-100 text-slate-700 hover:bg-slate-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    <span>Nhân viên học tập</span>
+                </button>
+            </div>
+
+            <!-- Role Content Container -->
+            <div class="rounded-3xl bg-slate-50 border border-slate-200 p-6 sm:p-10 shadow-soft">
+
+                <!-- TAB 1: GIÁM ĐỐC / ADMIN -->
+                <div id="panel-admin" class="role-panel grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-5 space-y-5">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-brand-blue text-xs font-bold">
+                            Góc nhìn Lãnh đạo & Quản trị hệ thống
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-navy-900">
+                            Nắm bắt toàn cảnh chất lượng nhân sự và tối ưu chi phí vận hành
+                        </h3>
+                        <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+                            Không cần hỏi báo cáo thủ công từ từng phòng ban. Dashboard tổng quan hiển thị theo thời gian thực tỷ lệ hoàn thành đào tạo, hồ sơ bàn giao và trạng thái gói thuê bao.
+                        </p>
+                        <ul class="space-y-3.5 pt-2">
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <span class="text-sm sm:text-base text-slate-700"><strong>Báo cáo trực quan:</strong> Theo dõi tỷ lệ hoàn thành 84%, cảnh báo lượt học quá hạn và xuất Excel 1 chạm.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <span class="text-sm sm:text-base text-slate-700"><strong>Sơ đồ tổ chức linh hoạt:</strong> Quản lý cây phòng ban, chức danh và nhập hàng loạt nhân viên từ file Excel.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <span class="text-sm sm:text-base text-slate-700"><strong>Tự động ngưng tính phí:</strong> Ngay khi nhân sự nghỉ việc hoàn tất bàn giao, hệ thống tự động vô hiệu hóa tài khoản.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- UI Preview Admin -->
+                    <div class="lg:col-span-7">
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-lg p-5 sm:p-6">
+                            <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-100">
+                                <div>
+                                    <h4 class="font-bold text-navy-900 text-base">Tổng quan Đào tạo & Tri thức Doanh nghiệp</h4>
+                                    <p class="text-xs text-slate-500">Cập nhật tự động • Tháng 11/2026</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold">Xuất báo cáo Excel</span>
+                            </div>
+
+                            <!-- KPI Grid -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                                <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-100">
+                                    <p class="text-xs text-slate-500 font-medium">Tỷ lệ hoàn thành</p>
+                                    <p class="text-2xl font-extrabold text-brand-blue mt-1">84%</p>
+                                    <span class="text-[11px] text-emerald-600 font-semibold">+12% so với tháng trước</span>
+                                </div>
+                                <div class="p-3.5 rounded-xl bg-teal-50 border border-teal-100">
+                                    <p class="text-xs text-slate-500 font-medium">Tài liệu xuất bản</p>
+                                    <p class="text-2xl font-extrabold text-brand-teal mt-1">48</p>
+                                    <span class="text-[11px] text-slate-500">100% đã phê duyệt</span>
+                                </div>
+                                <div class="p-3.5 rounded-xl bg-orange-50 border border-orange-100">
+                                    <p class="text-xs text-slate-500 font-medium">Bàn giao đang mở</p>
+                                    <p class="text-2xl font-extrabold text-brand-orange mt-1">02</p>
+                                    <span class="text-[11px] text-orange-700 font-medium">Đang chờ QLTT duyệt</span>
+                                </div>
+                                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                                    <p class="text-xs text-slate-500 font-medium">Tài khoản tính phí</p>
+                                    <p class="text-2xl font-extrabold text-navy-900 mt-1">64<span class="text-sm font-normal text-slate-400">/100</span></p>
+                                    <span class="text-[11px] text-slate-500">Đã khóa 3 TK nghỉ việc</span>
+                                </div>
+                            </div>
+
+                            <!-- Department Progress Bars -->
+                            <div class="space-y-3">
+                                <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Tiến độ hoàn thành theo phòng ban</p>
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-slate-700">Phòng Kinh doanh & CSKH (28 nhân sự)</span>
+                                        <span class="text-brand-blue">91%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2 rounded-full"><div class="bg-brand-blue h-2 rounded-full" style="width: 91%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-slate-700">Khối Vận hành & Kho vận (22 nhân sự)</span>
+                                        <span class="text-brand-teal">82%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2 rounded-full"><div class="bg-brand-teal h-2 rounded-full" style="width: 82%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-slate-700">Phòng Kế toán & Hành chính (14 nhân sự)</span>
+                                        <span class="text-emerald-600">100%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2 rounded-full"><div class="bg-emerald-500 h-2 rounded-full" style="width: 100%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: QUẢN LÝ TRỰC TIẾP / ĐÀO TẠO -->
+                <div id="panel-manager" class="role-panel hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-5 space-y-5">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-brand-teal text-xs font-bold">
+                            Góc nhìn Quản lý trực tiếp & Phụ trách đào tạo
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-navy-900">
+                            Kế thừa bộ mẫu có sẵn, kèm cặp thực hành và duyệt bàn giao chặt chẽ
+                        </h3>
+                        <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+                            Tiết kiệm 70% công sức soạn bài nhờ thư viện bộ mẫu chuẩn. Quản lý trực tiếp theo dõi sát sao năng lực thực tế của cấp dưới thay vì chỉ học lý thuyết suông.
+                        </p>
+                        <ul class="space-y-3.5 pt-2">
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-teal-100 text-brand-teal flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <span class="text-sm sm:text-base text-slate-700"><strong>Kế thừa & Tùy chỉnh bộ mẫu:</strong> Sao chép khóa học mẫu, kéo thả sắp xếp module và áp dụng cập nhật chọn lọc.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-teal-100 text-brand-teal flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <span class="text-sm sm:text-base text-slate-700"><strong>Xác nhận thực hành thực tế:</strong> Nhân viên chỉ được tính hoàn thành khóa học khi Quản lý trực tiếp đánh giá "Đạt" tay nghề.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-teal-100 text-brand-teal flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <span class="text-sm sm:text-base text-slate-700"><strong>Kiểm soát bàn giao cấp dưới:</strong> Kiểm tra từng hạng mục bàn giao, yêu cầu bổ sung hoặc lập thay nếu nhân sự nghỉ đột xuất.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- UI Preview Manager -->
+                    <div class="lg:col-span-7">
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-lg p-5 sm:p-6 space-y-4">
+                            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                                <h4 class="font-bold text-navy-900 text-base">Tác vụ cần Quản lý xử lý (3)</h4>
+                                <span class="px-2.5 py-1 rounded-full bg-orange-100 text-brand-orange text-xs font-bold">Ưu tiên cao</span>
+                            </div>
+
+                            <!-- Task 1: Practice Confirmation -->
+                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                    <span class="text-[11px] font-bold text-brand-blue uppercase">Chờ xác nhận thực hành (FR-08.05)</span>
+                                    <h5 class="font-bold text-slate-900 text-sm mt-0.5">Nguyễn Thị Lan – Quy trình tư vấn & chốt đơn B2B</h5>
+                                    <p class="text-xs text-slate-500 mt-1">Đã hoàn thành 100% bài học • Điểm trắc nghiệm: 85/100</p>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <span class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold">Xác nhận Đạt</span>
+                                </div>
+                            </div>
+
+                            <!-- Task 2: Handover Approval -->
+                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                    <span class="text-[11px] font-bold text-brand-orange uppercase">Xác nhận hoàn tất bàn giao (BR-010)</span>
+                                    <h5 class="font-bold text-slate-900 text-sm mt-0.5">Hồ sơ nghỉ việc: Trần Quốc Bảo (Trưởng nhóm Kho)</h5>
+                                    <p class="text-xs text-slate-500 mt-1">4/4 hạng mục đã được người nhận tiếp nhận • Có 1 mục kinh nghiệm lưu kho tri thức</p>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <span class="px-3 py-1.5 rounded-lg bg-navy-900 text-white text-xs font-bold">Duyệt hoàn tất</span>
+                                </div>
+                            </div>
+
+                            <!-- Task 3: Template Update -->
+                            <div class="p-4 rounded-xl bg-blue-50/70 border border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                    <span class="text-[11px] font-bold text-brand-teal uppercase">Cập nhật Bộ mẫu chuẩn v1.4</span>
+                                    <h5 class="font-bold text-slate-900 text-sm mt-0.5">Khóa mẫu: Kỹ năng An toàn lao động & PCCC cơ bản</h5>
+                                    <p class="text-xs text-slate-600 mt-1">Nhà cung cấp vừa bổ sung 2 bài học mới • Tùy chọn: Giữ bản cũ / Cập nhật</p>
+                                </div>
+                                <span class="px-3 py-1.5 rounded-lg bg-white border border-blue-300 text-brand-blue text-xs font-bold shrink-0">So sánh & Áp dụng</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: NHÂN VIÊN HỌC TẬP -->
+                <div id="panel-employee" class="role-panel hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-5 space-y-5">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-brand-orange text-xs font-bold">
+                            Góc nhìn Nhân viên (Tương thích Mobile từ 360px)
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-navy-900">
+                            Học tập mọi lúc trên điện thoại, tra cứu quy trình trong 5 giây
+                        </h3>
+                        <p class="text-sm sm:text-base text-slate-600 leading-relaxed">
+                            Giao diện "Việc học của tôi" thân thiện, không cần cài app phức tạp. Nhân viên mới biết chính xác mình cần học gì hôm nay, hạn hoàn thành bao giờ.
+                        </p>
+                        <ul class="space-y-3.5 pt-2">
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-orange-100 text-brand-orange flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <span class="text-sm sm:text-base text-slate-700"><strong>Lộ trình rõ ràng & Lưu tiến độ:</strong> Xem video, đọc tài liệu PDF ngay trên trình duyệt, tự động lưu vị trí đang học dở.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-orange-100 text-brand-orange flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <span class="text-sm sm:text-base text-slate-700"><strong>Nhắc hạn tự động:</strong> Hệ thống tự động thông báo qua ứng dụng và email trước 3 ngày đến hạn hoàn thành.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-orange-100 text-brand-orange flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <span class="text-sm sm:text-base text-slate-700"><strong>Thi trắc nghiệm & Khảo sát:</strong> Chấm điểm tự động ngay sau khi nộp bài và đóng góp ý kiến cải thiện khóa học.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- UI Preview Employee (Mobile + Desktop Responsive Card) -->
+                    <div class="lg:col-span-7 flex justify-center">
+                        <div class="w-full max-w-md bg-white rounded-3xl border-4 border-slate-800 shadow-2xl p-5">
+                            <!-- Mobile Header -->
+                            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                                <div>
+                                    <p class="text-[11px] text-slate-400 font-medium">Xin chào, Phạm Minh Anh</p>
+                                    <h4 class="font-extrabold text-navy-900 text-base">Việc học của tôi</h4>
+                                </div>
+                                <span class="w-8 h-8 rounded-full bg-blue-100 text-brand-blue flex items-center justify-center font-bold text-xs">MA</span>
+                            </div>
+
+                            <!-- Active Course Card -->
+                            <div class="rounded-2xl bg-gradient-to-br from-navy-900 to-brand-blue text-white p-4 mb-4">
+                                <div class="flex items-center justify-between text-[11px] text-blue-200 mb-1.5">
+                                    <span>Bắt buộc • Hội nhập</span>
+                                    <span class="px-2 py-0.5 rounded bg-orange-500 text-white font-bold">Còn 2 ngày</span>
+                                </div>
+                                <h5 class="font-bold text-sm sm:text-base mb-3">Văn hóa doanh nghiệp & Nội quy làm việc</h5>
+                                <div class="w-full bg-white/20 h-2 rounded-full mb-2">
+                                    <div class="bg-amber-400 h-2 rounded-full" style="width: 75%"></div>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <span>Tiến độ: 3/4 bài học</span>
+                                    <span class="font-bold underline">Học tiếp →</span>
+                                </div>
+                            </div>
+
+                            <!-- Quiz & Knowledge Search -->
+                            <div class="space-y-2.5">
+                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-800">Bài kiểm tra cuối khóa</p>
+                                        <p class="text-[11px] text-slate-500">15 câu trắc nghiệm • Điểm đạt: ≥ 70%</p>
+                                    </div>
+                                    <span class="px-2.5 py-1 rounded-lg bg-teal-600 text-white text-xs font-bold">Làm bài</span>
+                                </div>
+                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-800">Tra cứu Kho tri thức nội bộ</p>
+                                        <p class="text-[11px] text-slate-500">24 quy trình thuộc Phòng Kinh doanh</p>
+                                    </div>
+                                    <span class="text-xs font-bold text-brand-blue">Mở kho →</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 6. ĐIỂM KHÁC BIỆT VƯỢT TRỘI (USP & BẢNG GIÁ MINH BẠCH) ==================== -->
+    <section id="diem-khac-biet" class="py-16 sm:py-24 bg-slate-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-14">
+                <span class="text-xs font-bold uppercase tracking-widest text-orange-300 bg-orange-500/15 border border-orange-400/30 px-3 py-1.5 rounded-full">Lợi thế cạnh tranh & Chính sách giá</span>
+                <h2 class="mt-4 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white">
+                    Thiết kế thực dụng cho doanh nghiệp SMEs Việt Nam
+                </h2>
+                <p class="mt-3 text-base text-slate-300">
+                    Triển khai nhanh trong vài ngày, chi phí công bằng đến từng tài khoản thực tế và bảo mật dữ liệu tuyệt đối.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- USP Card 1 -->
+                <div class="rounded-2xl bg-slate-800/80 border border-slate-700 p-7 flex flex-col justify-between hover:border-blue-500/60 transition-all">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center mb-6">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">"Không bắt đầu từ trang giấy trắng"</h3>
+                        <p class="text-sm text-slate-300 leading-relaxed mb-6">
+                            Hệ thống cung cấp sẵn <strong>Bộ mẫu chương trình & bài học chuẩn</strong> theo ngành nghề và nhóm vị trí. Doanh nghiệp chỉ cần sao chép, tùy chỉnh theo đặc thù riêng và chủ động chọn lọc khi nhà cung cấp phát hành phiên bản cập nhật mới.
+                        </p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-700/80 flex items-center justify-between text-xs text-blue-300 font-semibold">
+                        <span>Mô hình B chuẩn hóa (BR-001)</span>
+                        <span>Giữ / Thay / Tạo bản sao</span>
+                    </div>
+                </div>
+
+                <!-- USP Card 2 (Highlighted Pricing Model) -->
+                <div class="rounded-2xl bg-gradient-to-b from-navy-800 to-slate-800 border-2 border-brand-orange p-7 flex flex-col justify-between shadow-2xl relative">
+                    <div class="absolute -top-3.5 right-6 px-3 py-1 rounded-full bg-brand-orange text-white text-xs font-extrabold uppercase tracking-wide shadow">
+                        Minh bạch 100%
+                    </div>
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-orange-500/20 text-brand-orange flex items-center justify-center mb-6">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Tính phí theo nhân sự thực tế kích hoạt</h3>
+                        <p class="text-sm text-slate-200 leading-relaxed mb-6">
+                            Không lãng phí ngân sách cho tài khoản ảo. Chỉ tính phí dựa trên <strong>số tài khoản nhân viên đang hoạt động</strong> (BR-016). Khi nhân sự nghỉ việc hoàn tất bàn giao, tài khoản tự động vô hiệu hóa và <strong>ngừng tính phí ngay lập tức</strong>.
+                        </p>
+                    </div>
+                    <div class="pt-4 border-t border-white/15 flex items-center justify-between text-xs text-orange-300 font-semibold">
+                        <span>Gói linh hoạt theo quy mô</span>
+                        <span>Không phí ẩn cài đặt</span>
+                    </div>
+                </div>
+
+                <!-- USP Card 3 -->
+                <div class="rounded-2xl bg-slate-800/80 border border-slate-700 p-7 flex flex-col justify-between hover:border-teal-500/60 transition-all">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center mb-6">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Vận hành độc lập & Bảo mật đa tầng</h3>
+                        <p class="text-sm text-slate-300 leading-relaxed mb-6">
+                            Sử dụng độc lập mà không bắt buộc mua kèm hệ sinh thái ERP/HRM cồng kềnh. Dữ liệu mỗi doanh nghiệp được <strong>cách ly tuyệt đối ở tầng cơ sở dữ liệu (Row Level Security)</strong> và sao lưu tự động hằng ngày.
+                        </p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-700/80 flex items-center justify-between text-xs text-teal-300 font-semibold">
+                        <span>Chuẩn bảo mật SaaS (NFR-01)</span>
+                        <span>Backup hằng ngày</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 7. CHƯƠNG TRÌNH DOANH NGHIỆP PILOT & FORM ĐĂNG KÝ ==================== -->
+    <section id="chuong-trinh-pilot" class="py-16 sm:py-24 bg-gradient-to-b from-slate-50 to-blue-50/60">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- 5 Success Metrics Banner -->
+            <div class="rounded-3xl bg-white border border-slate-200 p-6 sm:p-10 shadow-soft mb-14">
+                <div class="text-center max-w-2xl mx-auto mb-8">
+                    <span class="text-xs font-bold uppercase tracking-widest text-brand-teal">Mục tiêu cam kết sau 3 tháng triển khai Pilot</span>
+                    <h2 class="mt-2 text-2xl sm:text-3xl font-extrabold text-navy-900">
+                        Hiệu quả đo lường bằng con số thực tế
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="p-4 rounded-2xl bg-blue-50/70 border border-blue-100 text-center">
+                        <div class="text-2xl sm:text-3xl font-extrabold text-brand-blue">≥ 80%</div>
+                        <p class="text-xs sm:text-sm font-medium text-slate-700 mt-1.5">Nhân viên mới hoàn thành hội nhập đúng hạn</p>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-teal-50/70 border border-teal-100 text-center">
+                        <div class="text-2xl sm:text-3xl font-extrabold text-brand-teal">100%</div>
+                        <p class="text-xs sm:text-sm font-medium text-slate-700 mt-1.5">Nhân sự nghỉ việc có hồ sơ bàn giao hoàn tất</p>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-orange-50/70 border border-orange-100 text-center">
+                        <div class="text-2xl sm:text-3xl font-extrabold text-brand-orange">≥ 30</div>
+                        <p class="text-xs sm:text-sm font-medium text-slate-700 mt-1.5">Nội dung tri thức cốt lõi được chuẩn hóa & xuất bản</p>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-100 text-center">
+                        <div class="text-2xl sm:text-3xl font-extrabold text-indigo-600">≥ 4.0/5</div>
+                        <p class="text-xs sm:text-sm font-medium text-slate-700 mt-1.5">Điểm hài lòng trung bình khảo sát khóa học</p>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-slate-100 border border-slate-200 text-center sm:col-span-2 lg:col-span-1">
+                        <div class="text-2xl sm:text-3xl font-extrabold text-navy-900">3 – 5</div>
+                        <p class="text-xs sm:text-sm font-medium text-slate-700 mt-1.5">Doanh nghiệp tiên phong tại Thanh Hóa đợt 1</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pilot Offer & Registration Form Grid -->
+            <div id="dang-ky-pilot" class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start scroll-mt-24">
+
+                <!-- Left: Exclusive Pilot Offer for Thanh Hoa -->
+                <div class="lg:col-span-6 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 text-brand-orange text-xs font-bold">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span>Dành riêng cho Doanh nghiệp tại Thanh Hóa</span>
+                    </div>
+
+                    <h3 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-navy-900 leading-tight">
+                        Chương trình Đồng hành Chuyển đổi số Tri thức – Đợt Pilot 1.0
+                    </h3>
+
+                    <p class="text-base text-slate-600 leading-relaxed">
+                        Chúng tôi tìm kiếm <strong>3–5 doanh nghiệp tiên phong tại Thanh Hóa</strong> để đồng hành triển khai thực tế và tối ưu hóa quy trình đào tạo nội bộ với đặc quyền hỗ trợ 1-1 từ đội ngũ phát triển sản phẩm.
+                    </p>
+
+                    <div class="space-y-4 pt-2">
+                        <div class="flex items-start gap-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                            <div class="w-10 h-10 rounded-xl bg-teal-50 text-brand-teal flex items-center justify-center shrink-0 font-extrabold">01</div>
+                            <div>
+                                <h4 class="font-bold text-navy-900 text-base">Miễn phí 100% chi phí sử dụng trong 3 tháng Pilot</h4>
+                                <p class="text-sm text-slate-600 mt-1">Trải nghiệm đầy đủ toàn bộ 11 phân hệ quản trị tri thức, đào tạo, thi trắc nghiệm và bàn giao nghỉ việc.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-brand-blue flex items-center justify-center shrink-0 font-extrabold">02</div>
+                            <div>
+                                <h4 class="font-bold text-navy-900 text-base">Hỗ trợ nhập dữ liệu nhân sự & cơ cấu phòng ban từ Excel</h4>
+                                <p class="text-sm text-slate-600 mt-1">Đội ngũ kỹ thuật hỗ trợ thiết lập không gian doanh nghiệp, phân quyền vai trò và hướng dẫn vận hành trực tiếp.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                            <div class="w-10 h-10 rounded-xl bg-orange-50 text-brand-orange flex items-center justify-center shrink-0 font-extrabold">03</div>
+                            <div>
+                                <h4 class="font-bold text-navy-900 text-base">Đồng hành biên soạn khung đào tạo mẫu ban đầu</h4>
+                                <p class="text-sm text-slate-600 mt-1">Tư vấn chuyển đổi tài liệu Word/PDF sẵn có của công ty thành chương trình đào tạo hội nhập chuẩn hóa.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Lead Registration Form -->
+                <div class="lg:col-span-6">
+                    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xl">
+                        <div class="mb-6">
+                            <h4 class="text-xl sm:text-2xl font-extrabold text-navy-900">Đăng ký nhận tư vấn & Suất Pilot</h4>
+                            <p class="text-sm text-slate-500 mt-1">Điền thông tin bên dưới, chuyên viên tại Thanh Hóa sẽ liên hệ demo trong vòng 2 giờ làm việc.</p>
+                        </div>
+
+                        <!-- Form -->
+                        <form id="pilot-form" class="space-y-4" novalidate>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="fullName" class="block text-sm font-semibold text-slate-700 mb-1.5">Họ tên người liên hệ <span class="text-rose-500">*</span></label>
+                                    <input type="text" id="fullName" name="fullName" required placeholder="VD: Nguyễn Văn An"
+                                        class="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition">
+                                </div>
+                                <div>
+                                    <label for="jobTitle" class="block text-sm font-semibold text-slate-700 mb-1.5">Chức vụ <span class="text-rose-500">*</span></label>
+                                    <input type="text" id="jobTitle" name="jobTitle" required placeholder="VD: Giám đốc / Trưởng phòng HCNS"
+                                        class="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="companyName" class="block text-sm font-semibold text-slate-700 mb-1.5">Tên doanh nghiệp <span class="text-rose-500">*</span></label>
+                                <input type="text" id="companyName" name="companyName" required placeholder="VD: Công ty TNHH Thương mại & Dịch vụ..."
+                                    class="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition">
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="companySize" class="block text-sm font-semibold text-slate-700 mb-1.5">Quy mô nhân sự <span class="text-rose-500">*</span></label>
+                                    <select id="companySize" name="companySize" required
+                                        class="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition">
+                                        <option value="">-- Chọn quy mô --</option>
+                                        <option value="under-30">Dưới 30 nhân sự</option>
+                                        <option value="30-100">Từ 30 – 100 nhân sự</option>
+                                        <option value="over-100">Trên 100 nhân sự</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="phone" class="block text-sm font-semibold text-slate-700 mb-1.5">Số điện thoại / Zalo <span class="text-rose-500">*</span></label>
+                                    <input type="tel" id="phone" name="phone" required placeholder="VD: 0912 345 678"
+                                        class="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition">
+                                </div>
+                            </div>
+
+                            <!-- Inline Validation Error Message Box -->
+                            <div id="form-error-msg" class="hidden p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm font-medium">
+                                Vui lòng điền đầy đủ các thông tin bắt buộc và kiểm tra lại số điện thoại.
+                            </div>
+
+                            <button type="submit" class="w-full py-4 px-6 rounded-xl text-base font-bold text-white bg-brand-orange hover:bg-orange-600 shadow-lg shadow-orange-500/25 transition-all flex items-center justify-center gap-2">
+                                <span>Gửi đăng ký tham gia Pilot ngay</span>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                </svg>
+                            </button>
+
+                            <p class="text-center text-xs text-slate-400">
+                                Cam kết bảo mật thông tin doanh nghiệp 100%. Không ràng buộc chi phí khi trải nghiệm Pilot.
+                            </p>
+                        </form>
+
+                        <!-- Success Feedback State (Hidden by default) -->
+                        <div id="form-success-box" class="hidden text-center py-8 px-4 space-y-4">
+                            <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+                                <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <h4 class="text-xl sm:text-2xl font-extrabold text-navy-900">Đăng ký thành công!</h4>
+                            <p id="success-summary" class="text-sm sm:text-base text-slate-600 leading-relaxed max-w-md mx-auto">
+                                Cảm ơn bạn đã quan tâm đến EduCore36. Đội ngũ triển khai tại Thanh Hóa đã ghi nhận thông tin và sẽ liên hệ qua Zalo/Điện thoại trong thời gian sớm nhất.
+                            </p>
+                            <div class="pt-3">
+                                <button type="button" id="reset-form-btn" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-brand-blue bg-blue-50 hover:bg-blue-100 transition">
+                                    Đăng ký thêm doanh nghiệp khác
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 8. FAQ (CÂU HỎI THƯỜNG GẶP) ==================== -->
+    <section class="py-16 sm:py-24 bg-white border-t border-slate-200/80">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <span class="text-xs font-bold uppercase tracking-widest text-brand-blue bg-blue-50 px-3 py-1.5 rounded-full">Giải đáp thắc mắc</span>
+                <h2 class="mt-4 text-2xl sm:text-3xl font-extrabold text-navy-900">
+                    Câu hỏi thường gặp từ các doanh nghiệp
+                </h2>
+            </div>
+
+            <div class="space-y-4" id="faq-container">
+                <!-- FAQ 1 -->
+                <div class="faq-item rounded-2xl border border-slate-200 bg-slate-50/50 overflow-hidden">
+                    <button type="button" class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 focus:outline-none" aria-expanded="true">
+                        <span class="font-bold text-navy-900 text-base sm:text-lg">1. Dữ liệu nội bộ của công ty tôi có bị công ty khác xem được không?</span>
+                        <svg class="faq-icon w-5 h-5 text-brand-blue shrink-0 transform rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-5 text-sm sm:text-base text-slate-600 leading-relaxed">
+                        <strong>Tuyệt đối không.</strong> Hệ thống áp dụng cơ chế cách ly dữ liệu đa doanh nghiệp ở cả tầng ứng dụng lẫn tầng cơ sở dữ liệu (PostgreSQL Row Level Security). Mỗi doanh nghiệp sở hữu mã định danh (Tenant ID) và kho lưu trữ tệp tách biệt hoàn toàn; ngay cả Quản trị nền tảng cũng không được phép xem nội dung tài liệu riêng hay kết quả học tập của doanh nghiệp bạn.
+                    </div>
+                </div>
+
+                <!-- FAQ 2 -->
+                <div class="faq-item rounded-2xl border border-slate-200 bg-slate-50/50 overflow-hidden">
+                    <button type="button" class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 focus:outline-none" aria-expanded="false">
+                        <span class="font-bold text-navy-900 text-base sm:text-lg">2. Khi nhân viên nghỉ việc thì công ty tôi có bị mất phí duy trì tài khoản đó không?</span>
+                        <svg class="faq-icon w-5 h-5 text-slate-500 shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-sm sm:text-base text-slate-600 leading-relaxed">
+                        <strong>Không.</strong> Căn cứ tính phí của EduCore36 là số tài khoản nhân viên đang kích hoạt sử dụng thực tế. Khi nhân viên nghỉ việc hoàn tất quy trình bàn giao (và được Quản lý trực tiếp xác nhận), tài khoản sẽ tự động chuyển sang trạng thái vô hiệu hóa và ngừng tính phí. Toàn bộ hồ sơ bàn giao và lịch sử học tập vẫn được lưu trữ để tra cứu.
+                    </div>
+                </div>
+
+                <!-- FAQ 3 -->
+                <div class="faq-item rounded-2xl border border-slate-200 bg-slate-50/50 overflow-hidden">
+                    <button type="button" class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 focus:outline-none" aria-expanded="false">
+                        <span class="font-bold text-navy-900 text-base sm:text-lg">3. Nhân viên kinh doanh, kho vận thường xuyên di chuyển có học trên điện thoại được không?</span>
+                        <svg class="faq-icon w-5 h-5 text-slate-500 shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-sm sm:text-base text-slate-600 leading-relaxed">
+                        <strong>Hoàn toàn được.</strong> Toàn bộ giao diện người học (xem video bài giảng, đọc tài liệu PDF, làm bài kiểm tra trắc nghiệm, khảo sát và tra cứu kho tri thức) được tối ưu chuẩn Web Responsive cho màn hình điện thoại từ 360px trở lên. Nhân viên chỉ cần mở trình duyệt web trên điện thoại là học được ngay mà không cần tải ứng dụng nặng máy.
+                    </div>
+                </div>
+
+                <!-- FAQ 4 -->
+                <div class="faq-item rounded-2xl border border-slate-200 bg-slate-50/50 overflow-hidden">
+                    <button type="button" class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 focus:outline-none" aria-expanded="false">
+                        <span class="font-bold text-navy-900 text-base sm:text-lg">4. Doanh nghiệp chưa từng làm đào tạo bài bản thì mất bao lâu để triển khai?</span>
+                        <svg class="faq-icon w-5 h-5 text-slate-500 shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div class="faq-content hidden px-6 pb-5 text-sm sm:text-base text-slate-600 leading-relaxed">
+                        Chỉ mất từ <strong>2 đến 5 ngày làm việc</strong>. Nhờ tính năng nhập danh sách nhân sự từ file Excel có sẵn và thư viện Bộ mẫu chương trình đào tạo chuẩn, doanh nghiệp của bạn có thể kích hoạt ngay các khóa hội nhập cơ bản và đưa tài liệu Word/PDF sẵn có lên hệ thống mà không cần đội ngũ IT riêng.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 9. FOOTER ==================== -->
+    <footer class="bg-navy-950 text-slate-400 pt-14 pb-10 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-10 pb-10 border-b border-slate-800/80">
+                <!-- Brand Info -->
+                <div class="md:col-span-5 space-y-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-brand-blue flex items-center justify-center text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                        </div>
+                        <span class="font-extrabold text-xl text-white">EduCore<span class="text-brand-blue">36</span></span>
+                    </div>
+                    <p class="text-sm leading-relaxed max-w-sm">
+                        Nền tảng quản trị tri thức và đào tạo nội bộ doanh nghiệp (PRD-EDU-001). Giải pháp SaaS giúp chuẩn hóa quy trình, đào tạo tự động và kế thừa tri thức bền vững cho cộng đồng doanh nghiệp Thanh Hóa.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="md:col-span-3 space-y-3">
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider">Liên kết nhanh</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#van-de-giai-phap" class="hover:text-white transition">Vấn đề & Giải pháp</a></li>
+                        <li><a href="#ba-tru-cot" class="hover:text-white transition">3 Trụ cột nghiệp vụ</a></li>
+                        <li><a href="#trai-nghiem-vai-tro" class="hover:text-white transition">Giao diện theo vai trò</a></li>
+                        <li><a href="#diem-khac-biet" class="hover:text-white transition">Chính sách tính phí</a></li>
+                        <li><a href="#dang-ky-pilot" class="hover:text-orange-400 text-orange-300 font-medium transition">Đăng ký Pilot Thanh Hóa</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info Thanh Hoa -->
+                <div class="md:col-span-4 space-y-3">
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider">Văn phòng Tư vấn & Triển khai</h4>
+                    <ul class="space-y-2.5 text-sm">
+                        <li class="flex items-start gap-2.5">
+                            <svg class="w-5 h-5 text-brand-blue shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            <span>Phường Hạc Thành, Thành phố Thanh Hóa, Tỉnh Thanh Hóa</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <svg class="w-5 h-5 text-brand-teal shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                            </svg>
+                            <span>Hotline / Zalo Tư vấn: <strong class="text-white">0904.36.36.88</strong></span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <svg class="w-5 h-5 text-brand-orange shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                            <span>pilot@educore36.vn</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+                <p>© 2026 EduCore36 (TriThuc36). Phát triển dành cho Doanh nghiệp Việt Nam.</p>
+                <p>Phiên bản tài liệu đặc tả: PRD-EDU-001 v1.0 (MVP Pilot)</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== VANILLA JAVASCRIPT INTERACTIVITY ==================== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Mobile Navigation Toggle
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const iconOpen = document.getElementById('menu-icon-open');
+            const iconClose = document.getElementById('menu-icon-close');
+            const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+
+            function toggleMobileMenu() {
+                const isHidden = mobileMenu.classList.contains('hidden');
+                if (isHidden) {
+                    mobileMenu.classList.remove('hidden');
+                    iconOpen.classList.add('hidden');
+                    iconClose.classList.remove('hidden');
+                } else {
+                    mobileMenu.classList.add('hidden');
+                    iconOpen.classList.remove('hidden');
+                    iconClose.classList.add('hidden');
+                }
+            }
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+            }
+
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                    iconOpen.classList.remove('hidden');
+                    iconClose.classList.add('hidden');
+                });
+            });
+
+            // 2. Interactive Role Tabs
+            const roleTabBtns = document.querySelectorAll('.role-tab-btn');
+            const rolePanels = document.querySelectorAll('.role-panel');
+
+            roleTabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetRole = btn.getAttribute('data-role');
+
+                    // Update button active styles
+                    roleTabBtns.forEach(b => {
+                        b.classList.remove('bg-navy-900', 'text-white', 'shadow-md');
+                        b.classList.add('bg-slate-100', 'text-slate-700', 'hover:bg-slate-200');
+                    });
+                    btn.classList.remove('bg-slate-100', 'text-slate-700', 'hover:bg-slate-200');
+                    btn.classList.add('bg-navy-900', 'text-white', 'shadow-md');
+
+                    // Switch panels
+                    rolePanels.forEach(panel => {
+                        if (panel.id === `panel-${targetRole}`) {
+                            panel.classList.remove('hidden');
+                        } else {
+                            panel.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            // 3. Pilot Registration Form Handling
+            const pilotForm = document.getElementById('pilot-form');
+            const formErrorMsg = document.getElementById('form-error-msg');
+            const formSuccessBox = document.getElementById('form-success-box');
+            const successSummary = document.getElementById('success-summary');
+            const resetFormBtn = document.getElementById('reset-form-btn');
+
+            if (pilotForm) {
+                pilotForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    const fullName = document.getElementById('fullName').value.trim();
+                    const jobTitle = document.getElementById('jobTitle').value.trim();
+                    const companyName = document.getElementById('companyName').value.trim();
+                    const companySize = document.getElementById('companySize').value;
+                    const phone = document.getElementById('phone').value.trim();
+
+                    // Basic validation
+                    const phoneRegex = /^[0-9\s\+\-\.]{8,15}$/;
+                    if (!fullName || !jobTitle || !companyName || !companySize || !phoneRegex.test(phone)) {
+                        formErrorMsg.classList.remove('hidden');
+                        return;
+                    }
+
+                    formErrorMsg.classList.add('hidden');
+
+                    // Show confirmation state
+                    successSummary.innerHTML = `Cảm ơn anh/chị <strong>${fullName}</strong> (${jobTitle} – <strong>${companyName}</strong>). Đội ngũ triển khai tại Thanh Hóa đã ghi nhận đăng ký suất Pilot và sẽ liên hệ qua số <strong>${phone}</strong> trong vòng 2 giờ làm việc.`;
+                    pilotForm.classList.add('hidden');
+                    formSuccessBox.classList.remove('hidden');
+                });
+            }
+
+            if (resetFormBtn) {
+                resetFormBtn.addEventListener('click', () => {
+                    pilotForm.reset();
+                    formSuccessBox.classList.add('hidden');
+                    pilotForm.classList.remove('hidden');
+                });
+            }
+
+            // 4. FAQ Accordion
+            const faqToggles = document.querySelectorAll('.faq-toggle');
+            faqToggles.forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const faqItem = toggle.closest('.faq-item');
+                    const content = faqItem.querySelector('.faq-content');
+                    const icon = faqItem.querySelector('.faq-icon');
+                    const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+
+                    // Close all other FAQs for clean accordion behavior
+                    document.querySelectorAll('.faq-item').forEach(item => {
+                        if (item !== faqItem) {
+                            item.querySelector('.faq-content').classList.add('hidden');
+                            item.querySelector('.faq-toggle').setAttribute('aria-expanded', 'false');
+                            const otherIcon = item.querySelector('.faq-icon');
+                            otherIcon.classList.remove('rotate-180', 'text-brand-blue');
+                            otherIcon.classList.add('text-slate-500');
+                        }
+                    });
+
+                    // Toggle current FAQ
+                    if (isExpanded) {
+                        content.classList.add('hidden');
+                        toggle.setAttribute('aria-expanded', 'false');
+                        icon.classList.remove('rotate-180', 'text-brand-blue');
+                        icon.classList.add('text-slate-500');
+                    } else {
+                        content.classList.remove('hidden');
+                        toggle.setAttribute('aria-expanded', 'true');
+                        icon.classList.add('rotate-180', 'text-brand-blue');
+                        icon.classList.remove('text-slate-500');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

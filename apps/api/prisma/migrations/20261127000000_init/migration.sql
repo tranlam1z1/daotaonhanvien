@@ -1,0 +1,1 @@
+-- T00: empty baseline, no business tables.

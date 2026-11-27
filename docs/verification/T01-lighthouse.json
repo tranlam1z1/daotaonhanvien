@@ -1,0 +1,43 @@
+{
+  "lighthouseVersion": "13.6.0",
+  "fetchTime": "2026-11-27T09:09:21.534Z",
+  "url": "http://localhost:3000/",
+  "formFactor": "mobile",
+  "throttlingMethod": "simulate",
+  "throttling": {
+    "rttMs": 150,
+    "throughputKbps": 1638.4,
+    "requestLatencyMs": 562.5,
+    "downloadThroughputKbps": 1474.5600000000002,
+    "uploadThroughputKbps": 675,
+    "cpuSlowdownMultiplier": 4
+  },
+  "screenEmulation": {
+    "mobile": true,
+    "width": 412,
+    "height": 823,
+    "deviceScaleFactor": 1.75,
+    "disabled": false
+  },
+  "chromeFlags": ["--headless=new", "--disable-gpu"],
+  "environment": {
+    "networkUserAgent": "Mozilla/5.0 (Linux; Android 11; moto g power (2022)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/159.0.0.0 Mobile Safari/537.36",
+    "hostUserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/159.0.0.0 Safari/537.36",
+    "benchmarkIndex": 1159.5,
+    "credits": {
+      "axe-core": "4.14.0"
+    }
+  },
+  "scores": {
+    "performance": 87,
+    "seo": 100
+  },
+  "metrics": {
+    "first-contentful-paint": "1.1 s",
+    "largest-contentful-paint": "1.1 s",
+    "total-blocking-time": "500 ms",
+    "cumulative-layout-shift": "0",
+    "speed-index": "1.2 s"
+  },
+  "warnings": []
+}
