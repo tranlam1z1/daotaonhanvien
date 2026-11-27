@@ -252,8 +252,11 @@ model User {
   managerId             String?          @map("manager_id") @db.Uuid
   manager               User?            @relation("UserManager", fields: [tenantId, managerId], references: [tenantId, id])
   reports               User[]           @relation("UserManager")
+  handoverCases         HandoverCase[]   @relation("HandoverEmployee")
   joinedAt              DateTime?        @map("joined_at") @db.Date
   leftAt                DateTime?        @map("left_at") @db.Date
+  workspaceNotices      WorkspaceNotice[]
+  mutedEmailGroups      String[]         @default([]) @map("muted_email_groups")
   status                UserStatus       @default(PENDING)
   roles                 UserRole[]
   leads                 Lead[]
@@ -277,6 +280,39 @@ model User {
   @@unique([tenantId, employeeCode])
   @@index([tenantId])
   @@map("users")
+}
+
+model HandoverCase {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  employeeId  String   @map("employee_id") @db.Uuid
+  employee    User     @relation("HandoverEmployee", fields: [tenantId, employeeId], references: [tenantId, id], onDelete: Restrict, onUpdate: Cascade)
+  departureOn DateTime @map("departure_on") @db.Date
+  dueOn       DateTime @map("due_on") @db.Date
+  createdBy   String   @map("created_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(3)
+  workflow    Json @default("{}")
+
+  @@index([tenantId, employeeId])
+  @@map("handover_cases")
+}
+
+model WorkspaceNotice {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  user User @relation(fields: [tenantId, userId], references: [tenantId, id], onDelete: Cascade, onUpdate: NoAction)
+  eventKey String @map("event_key")
+  message String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  readAt DateTime? @map("read_at") @db.Timestamptz(3)
+  emailHandledAt DateTime? @map("email_handled_at") @db.Timestamptz(3)
+  emailClaimedAt DateTime? @map("email_claimed_at") @db.Timestamptz(3)
+
+  @@unique([tenantId, userId, eventKey])
+  @@index([tenantId, userId, createdAt])
+  @@map("workspace_notices")
 }
 
 enum AuthCredentialKind {

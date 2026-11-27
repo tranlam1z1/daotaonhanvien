@@ -7,6 +7,7 @@ import {
 import { type AuthCredentialKind, type User } from '@prisma/client';
 import { argon2id, hash, verify } from 'argon2';
 import { TenantDatabase } from '../tenant/tenant-database';
+import { localDay } from '../assignments/assignment-input';
 import { AuthMailer } from './auth-mailer';
 import {
   authPolicy,
@@ -149,10 +150,23 @@ export class AuthService {
             },
             select: { id: true },
           }));
+        const today = localDay(new Date(now));
+        const [handover] =
+          tenantId && status === 'ACTIVE' && user.leftAt
+            ? await this.client.$queryRaw<
+                { dueOn: Date }[]
+              >`SELECT due_on AS "dueOn"
+              FROM handover_cases WHERE tenant_id = ${tenantId}::uuid AND employee_id = ${id}::uuid AND completed_at IS NULL`
+            : [];
         return {
           id,
           tenantId,
-          status,
+          status:
+            handover &&
+            user.leftAt &&
+            (today >= localDay(user.leftAt) || today > localDay(handover.dueOn))
+              ? 'HANDOVER'
+              : status,
           roles,
           hasDirectReports: !!directReport,
           profile: {

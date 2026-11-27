@@ -6,6 +6,8 @@ import {
   Inject,
   Injectable,
   Logger,
+  Param,
+  ParseUUIDPipe,
   PayloadTooLargeException,
   Post,
   Req,
@@ -62,6 +64,27 @@ export class FilesController {
     @Req() request: SessionRequest,
     @UploadedFile() file?: DiskUpload,
   ) {
+    return this.save(request, file);
+  }
+
+  @Post('handover/:id')
+  @UseGuards(AuthOriginGuard)
+  @RequirePermission('session.profile')
+  @UseManualTenantTransaction()
+  @UseInterceptors(FileUploadInterceptor)
+  async uploadHandover(
+    @Req() request: SessionRequest,
+    @Param('id', ParseUUIDPipe) handoverId: string,
+    @UploadedFile() file?: DiskUpload,
+  ) {
+    return this.save(request, file, handoverId);
+  }
+
+  private async save(
+    request: SessionRequest,
+    file?: DiskUpload,
+    handoverId?: string,
+  ) {
     if (!file)
       throw new BadRequestException('Vui lòng chọn một tệp để tải lên.');
     try {
@@ -69,6 +92,7 @@ export class FilesController {
         request.user!,
         file,
         request.query.departmentId,
+        handoverId,
       );
     } finally {
       await unlink(file.path).catch(() =>

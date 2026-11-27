@@ -324,7 +324,14 @@ export class EmployeeService {
     await this.lock(actor);
     const employee = await this.find(actor, id);
     if (employee.status === 'DISABLED') return employee;
-    if (note.length > 500 || (employee.status === 'HANDOVER' && !note))
+    const openHandover = await this.db.handoverCase.findFirst({
+      where: { tenantId: actor.tenantId, employeeId: id, completedAt: null },
+      select: { id: true },
+    });
+    if (
+      note.length > 500 ||
+      ((employee.status === 'HANDOVER' || openHandover) && !note)
+    )
       throw new BadRequestException(
         'Vui lòng nhập lý do vô hiệu hóa, tối đa 500 ký tự.',
       );

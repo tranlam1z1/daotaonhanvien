@@ -11,7 +11,7 @@ import {
 } from 'react';
 import { accountError, apiUrl, sendAccountAction } from '../../lib/account-api';
 import { availableSections, type Account } from '../../lib/workspace';
-import { KnowledgeNotifications } from '../knowledge/KnowledgeNotifications';
+import { WorkspaceNotices } from './StageThree';
 import { Button, EmptyState, Toast } from '../ui/controls';
 import { Modal } from '../ui/Modal';
 
@@ -230,7 +230,7 @@ function WorkspaceNavigation({ children }: { children: ReactNode }) {
       >
         {notifications &&
           (account.tenantId ? (
-            <KnowledgeNotifications />
+            <WorkspaceNotices />
           ) : (
             <EmptyState title="Chưa có thông báo" />
           ))}

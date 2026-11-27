@@ -4,6 +4,7 @@ import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'argon2';
+import { Workbook } from 'exceljs';
 import request from 'supertest';
 import { AppModule } from '../app.module';
 import { webOrigin } from '../auth/auth-policy';
@@ -455,5 +456,62 @@ integration('F06 assignment management', () => {
     expect(
       await root.enrollment.findUnique({ where: { id: foreignRow.id } }),
     ).toMatchObject({ status: 'NOT_STARTED' });
+  });
+  it('AC-14 reports the same filtered enrollment rows and exports only that selection', async () => {
+    const { course, release } = await publishCourse(own, 'Kiểm tra báo cáo');
+    const learner = own.users[1];
+    const created = await root.enrollment.create({
+      data: {
+        tenantId: own.tenantId,
+        userId: learner.id,
+        courseId: course.id,
+        courseVersionId: release.id,
+        source: 'MANUAL',
+        dueAt: new Date(Date.now() - dayMs),
+      },
+    });
+    const filter = `?courseId=${course.id}`;
+    const listing = (await api('get', filter).expect(200)).body;
+    const report = (
+      await api(
+        'get',
+        `${filter}&departmentId=${own.department.id}`,
+        admin,
+        '/reports',
+      ).expect(200)
+    ).body;
+    expect(
+      listing.map(({ id, status }: { id: string; status: string }) => ({
+        id,
+        status,
+      })),
+    ).toEqual([{ id: created.id, status: 'OVERDUE' }]);
+    expect(report.rows).toMatchObject([{ id: created.id, status: 'OVERDUE' }]);
+    expect(report.groups.courses).toMatchObject([
+      { name: course.name, totals: { OVERDUE: 1 } },
+    ]);
+    await api('get', filter, employee, '/reports').expect(403);
+    const outsider = (await api('get', filter, foreign, '/reports').expect(200))
+      .body;
+    expect(outsider.rows).toEqual([]);
+    const file = await api(
+      'get',
+      `/export${filter}&departmentId=${own.department.id}`,
+      admin,
+      '/reports',
+    )
+      .buffer(true)
+      .parse((response, callback) => {
+        const chunks: Buffer[] = [];
+        response.on('data', (chunk: Buffer) => chunks.push(chunk));
+        response.on('end', () => callback(null, Buffer.concat(chunks)));
+      })
+      .expect(200);
+    const workbook = new Workbook();
+    await workbook.xlsx.load(file.body);
+    const sheet = workbook.getWorksheet('Tiến độ');
+    expect(sheet?.rowCount).toBe(2);
+    expect(sheet?.getCell('C2').value).toBe(course.name);
+    expect(sheet?.getCell('E2').value).toBe('Quá hạn');
   });
 });

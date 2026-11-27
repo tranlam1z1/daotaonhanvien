@@ -22,18 +22,20 @@ export function objectInput(body: unknown): Record<string, unknown> {
   return body as Record<string, unknown>;
 }
 
-function dateInput(value: string) {
+export function dateInput(value: string, label = 'Ngày vào làm') {
   if (!value) return null;
+  if (typeof value !== 'string')
+    throw new BadRequestException(`${label} không hợp lệ.`);
   const parts = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
   const iso = parts ? [parts[3], parts[2], parts[1]].join('-') : value;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(iso) || iso.startsWith('0000'))
-    throw new BadRequestException('Ngày vào làm không hợp lệ.');
+    throw new BadRequestException(`${label} không hợp lệ.`);
   const date = new Date(iso + 'T00:00:00Z');
   if (
     !Number.isFinite(date.valueOf()) ||
     date.toISOString().slice(0, 10) !== iso
   )
-    throw new BadRequestException('Ngày vào làm không hợp lệ.');
+    throw new BadRequestException(`${label} không hợp lệ.`);
   return date;
 }
 
