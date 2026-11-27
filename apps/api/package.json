@@ -3,25 +3,41 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "tsx watch src/main.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "jest --runInBand",
     "db:migrate": "prisma migrate deploy",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "auth:invite": "tsx prisma/invite.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1178.0",
+    "@aws-sdk/s3-request-presigner": "^3.1178.0",
     "@educore36/shared": "workspace:*",
     "@nestjs/common": "^11.1.0",
     "@nestjs/core": "^11.1.0",
     "@nestjs/platform-express": "^11.1.0",
+    "@prisma/client": "6.19.3",
+    "argon2": "^0.45.2",
+    "bullmq": "^5.81.6",
+    "dotenv": "^16.6.1",
+    "exceljs": "4.4.0",
+    "ioredis": "^5.11.1",
+    "nodemailer": "^7.0.13",
+    "parse5": "7.3.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "yauzl": "3.2.0"
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.0",
+    "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
+    "@types/nodemailer": "^7.0.12",
     "@types/supertest": "^6.0.3",
+    "@types/yauzl": "^3.4.0",
     "jest": "^30.2.0",
     "prisma": "^6.19.0",
     "supertest": "^7.1.0",

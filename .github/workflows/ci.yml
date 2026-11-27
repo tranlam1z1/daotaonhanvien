@@ -4,6 +4,13 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     services:
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+      mailpit:
+        image: axllent/mailpit:v1.27
+        ports: ['1025:1025', '8025:8025']
       postgres:
         image: postgres:16-alpine
         env:
@@ -14,6 +21,12 @@ jobs:
         options: --health-cmd "pg_isready -U educore36" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       DATABASE_URL: postgresql://educore36:educore36@localhost:5432/educore36?schema=public
+      REDIS_URL: redis://localhost:6379
+      SMTP_HOST: localhost
+      SMTP_PORT: 1025
+      LEAD_NOTIFY_EMAIL: pilot@educore36.local
+      LEAD_INTEGRATION_TEST: 'true'
+      TENANT_INTEGRATION_TEST: 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

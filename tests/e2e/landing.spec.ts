@@ -75,7 +75,7 @@ test('requires consent, preserves values on failure, and reports HTTP/network er
   page,
 }) => {
   let requests = 0;
-  await page.route('**/api/public/leads', async (route) => {
+  await page.route('**/public/leads', async (route) => {
     requests++;
     await route.fulfill({ status: 503, body: 'Unavailable' });
   });
@@ -99,7 +99,7 @@ test('requires consent, preserves values on failure, and reports HTTP/network er
   await expect(
     page.getByRole('heading', { name: 'Đăng ký thành công!' }),
   ).toHaveCount(0);
-  await page.route('**/api/public/leads', (route) => route.abort('failed'));
+  await page.route('**/public/leads', (route) => route.abort('failed'));
   await page
     .getByRole('button', { name: 'Gửi đăng ký tham gia Pilot ngay' })
     .click();
@@ -113,7 +113,7 @@ test('AC-17: success renders HTML payload as text, prevents duplicate submission
 }) => {
   const payload = '<img src=x onerror="window.__xss=1">';
   let requests = 0;
-  await page.route('**/api/public/leads', async (route) => {
+  await page.route('**/public/leads', async (route) => {
     requests++;
     expect(route.request().method()).toBe('POST');
     expect(route.request().postDataJSON()).toMatchObject({
