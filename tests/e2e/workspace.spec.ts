@@ -13,11 +13,12 @@ const seedAccounts = [
       'Nhân viên',
       'Kho tri thức',
       'Quản lý nội dung',
+      'Đào tạo',
       'Phê duyệt nội dung',
       'Bộ mẫu',
       'Phân bổ đào tạo',
       'Kiểm tra và khảo sát',
-      'Học tập',
+      'Việc học của tôi',
       'Xác nhận thực hành',
       'Báo cáo đào tạo',
       'Bàn giao',
@@ -29,30 +30,37 @@ const seedAccounts = [
       'Tổ chức',
       'Kho tri thức',
       'Quản lý nội dung',
+      'Đào tạo',
       'Bộ mẫu',
       'Phân bổ đào tạo',
       'Kiểm tra và khảo sát',
-      'Học tập',
+      'Việc học của tôi',
       'Báo cáo đào tạo',
       'Bàn giao',
     ],
   ],
   [
     'pd@demo-a.example',
-    ['Tổ chức', 'Kho tri thức', 'Phê duyệt nội dung', 'Học tập', 'Bàn giao'],
+    [
+      'Tổ chức',
+      'Kho tri thức',
+      'Phê duyệt nội dung',
+      'Việc học của tôi',
+      'Bàn giao',
+    ],
   ],
   [
     'nv1@demo-a.example',
     [
       'Tổ chức',
       'Kho tri thức',
-      'Học tập',
+      'Việc học của tôi',
       'Xác nhận thực hành',
       'Báo cáo đào tạo',
       'Bàn giao',
     ],
   ],
-  ['nv2@demo-a.example', ['Kho tri thức', 'Học tập', 'Bàn giao']],
+  ['nv2@demo-a.example', ['Kho tri thức', 'Việc học của tôi', 'Bàn giao']],
 ] as const;
 
 async function signIn(page: Page, email: string, password = seedPassword) {
@@ -98,7 +106,10 @@ test.describe('T06 / S01 / NFR-12', () => {
       await page.keyboard.press('Escape');
       await expect(page.getByRole('dialog')).toBeHidden();
 
-      await page.getByText('Tài khoản', { exact: true }).click();
+      await page
+        .getByRole('banner')
+        .getByText('Tài khoản', { exact: true })
+        .click();
       await page
         .getByRole('link', { name: 'Hồ sơ cá nhân', exact: true })
         .click();
@@ -120,7 +131,10 @@ test.describe('T06 / S01 / NFR-12', () => {
     await signIn(page, 'nv2@demo-a.example');
     await page.goto('/ung-dung/nhan-vien');
     await expect(page.getByText('Bạn không có quyền mở mục này')).toBeVisible();
-    await page.getByText('Tài khoản', { exact: true }).click();
+    await page
+      .getByRole('banner')
+      .getByText('Tài khoản', { exact: true })
+      .click();
     await page.getByRole('button', { name: 'Đăng xuất mọi thiết bị' }).click();
     await expect(page).toHaveURL(/\/dang-nhap$/);
   });

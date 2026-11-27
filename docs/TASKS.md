@@ -228,8 +228,76 @@ Mục tiêu theo mục XI của PRD là tạo và xuất bản tri thức, chư�
 
 ---
 
+# Giai đoạn 2 — Học tập
+
+T18, T21 và T22 có thể bắt đầu song song. T19 và T23 dùng chung cấu trúc lượt học T18. T20 và phần giao thủ công của T19 có thể phát triển song song sau khi chốt hàm tạo lượt dùng chung.
+
+## ☑ T18 — Lược đồ lượt học
+
+**FR/AC:** F06–F08, AC-05, AC-07, D-07 đến D-10, D-20. Phụ thuộc T03, T16.
+
+- `Enrollment` liên kết nhân viên, khóa học và đúng phiên bản đã giao. Lưu nguồn giao, chương trình hoặc quy tắc nếu có, hạn hoàn thành, trạng thái, tiến độ và thời điểm bắt đầu/hoàn thành.
+- Vòng đời dùng `NOT_STARTED`, `IN_PROGRESS`, `OVERDUE`, `COMPLETED`, `FAILED`, `CANCELLED`. Ba trạng thái đầu là lượt đang hiệu lực. Tính hoàn thành trễ bằng cách so sánh thời điểm hoàn thành với hạn lượt học.
+- Phân bổ lặp giữ lượt đang hiệu lực và lấy hạn muộn hơn. Giao lại từ lượt đã hoàn thành hoặc chưa đạt tạo lượt mới và giữ liên kết lượt cũ để T23 có thể kế thừa tiến độ của bài không đổi.
+- **Hoàn thành khi** migration chạy trên CSDL trống, có RLS, khóa ngoại theo tenant bảo đảm đúng khóa và phiên bản, ràng buộc ngăn hai lượt đang hiệu lực và test cách ly tenant.
+
+## ☑ T19 — Phân bổ thủ công và quản lý lượt học
+
+**FR/AC:** FR-06.03–06.05, AC-05, AC-07, AC-09, D-07 đến D-10. Phụ thuộc T18.
+
+- Giao khóa/chương trình đã xuất bản cho cá nhân, nhóm nhân viên được chọn hoặc phòng ban. Xem danh sách theo khóa, người và trạng thái. Hủy, gia hạn, giao lại theo quyền ADM/PTĐT.
+- **Hoàn thành khi** khóa mới dùng phiên bản xuất bản mới nhất, chương trình giao các khóa thành phần cùng hạn, giao đồng thời không tạo trùng và gia hạn cập nhật trạng thái quá hạn đúng. Kế thừa tiến độ khi giao lại kiểm tra cùng T23.
+
+## ☑ T20 — Quy tắc phân bổ tự động
+
+**FR/AC:** FR-03.07, FR-06.01–06.02, AC-06–07, D-08. Phụ thuộc T18 và hàm tạo lượt dùng chung của T19.
+
+- Tạo và sửa quy tắc theo phòng ban, chức danh, số ngày kể từ khi vào làm và hạn tính từ khi giao. Áp dụng khi tạo nhân viên, đổi phòng ban/chức danh hoặc khi quản trị chọn áp dụng cho nhân viên hiện có.
+- **Hoàn thành khi** quy tắc giao đúng nhân viên và hạn, dùng chung hành vi chống trùng với phân bổ thủ công, giữ lượt khi nhân viên chuyển phòng ban.
+
+## ☑ T21 — Ngân hàng câu hỏi và soạn đề
+
+**FR/AC:** FR-08.01–08.03, D-05. Phụ thuộc T14, T15.
+
+- Quản lý ba loại câu hỏi, đáp án, giải thích, khóa học/chủ đề và mẫu nhập Excel. Cấu hình đề cố định hoặc rút ngẫu nhiên, thời gian, ngưỡng đạt, số lượt, xáo trộn và hiển thị đáp án.
+- **Hoàn thành khi** quản trị viên trong đúng phạm vi soạn được đề và gắn vào bài học kiểm tra. Có test nhập Excel, cấu hình hợp lệ, từ chối dữ liệu sai và cách ly tenant.
+
+## ☑ T22 — Tìm kiếm trong tài liệu PDF và Word
+
+**FR/AC:** FR-04.09, FR-04.06, FR-07.05, NFR-01. Phụ thuộc T10, T13. Có thể làm độc lập với luồng học.
+
+- Mở rộng tìm kiếm của kho tri thức sang văn bản trong tệp PDF/Word đính kèm.
+- **Hoàn thành khi** từ khóa chỉ có trong tài liệu tìm được bài tri thức đang xuất bản và đúng phạm vi. Giữ bộ lọc hiện có, kiểm tra cách ly tenant, phiên bản cũ và tệp không đọc được.
+
+## ☑ T23 — Việc học của tôi và tiến độ bài học
+
+**FR/AC:** FR-07.01–07.07, AC-05, AC-09, D-06, D-09, D-10. Phụ thuộc T18, T13 và dùng dữ liệu phân bổ của T19.
+
+- Hiển thị lượt học và lịch sử, nội dung theo phiên bản đã giao, trạng thái, hạn và tiến độ. Hỗ trợ xem tài liệu/video, lưu vị trí, học tuần tự, mở kho tri thức theo quyền. Tích hợp bài kiểm tra qua T24.
+- **Hoàn thành khi** nhân viên chỉ truy cập lượt của mình, tiếp tục được lượt quá hạn, khôi phục vị trí học, chỉ kế thừa tiến độ của bài không đổi khi giao lại và dùng được giao diện từ 360px.
+
+## ☑ T24 — Làm bài kiểm tra và lưu lần làm
+
+**FR/AC:** FR-08.04, D-05 đến D-07. Phụ thuộc T18, T21, T23.
+
+- Cố định nội dung và cấu hình bài kiểm tra theo phiên bản khóa học đã giao, kể cả khi ngân hàng câu hỏi hoặc cấu hình đề được sửa. Chốt đề cho từng lần làm, lưu câu trả lời, chấm điểm, tự nộp hết giờ và kết nối kết quả với tiến độ học.
+- **Hoàn thành khi** câu trả lời đã lưu vẫn còn khi kết nối lại, đồng hồ dựa trên thời gian máy chủ và lần làm hết giờ chỉ được chấm một lần.
+
+## ☑ T25 — Xác nhận thực hành và xét hoàn thành
+
+**FR/AC:** FR-08.05–08.06, AC-08–09, BR-005, D-05 đến D-07, D-10. Phụ thuộc T23, T24.
+
+- Ghi kết quả thực hành trong phạm vi ADM/QLTT. Xét đủ các tiêu chí bật trên phiên bản đã giao và chuyển Chưa đạt khi hết lần thi mà chưa đạt.
+- **Hoàn thành khi** kiểm tra được từng tổ hợp tiêu chí, hoàn thành trễ và luồng giao khóa → học → thi → hoàn thành.
+
+## ☑ T26 — Khảo sát chất lượng khóa học
+
+**FR/AC:** FR-08.07, P-01. Phụ thuộc T25 cho điều kiện gửi khảo sát. Có thể triển khai mẫu và biểu mẫu trước.
+
+- Cho doanh nghiệp chỉnh mẫu mặc định và nhân viên đã hoàn thành khóa học gửi khảo sát tùy chọn.
+- **Hoàn thành khi** quyền quản lý mẫu và gửi khảo sát đúng phạm vi, phản hồi gắn đúng lượt học và trạng thái hoàn thành không phụ thuộc khảo sát.
+
 ## Phụ thuộc theo giai đoạn
 
-- **Giai đoạn 2:** F06 thực hiện phân bổ, F07 thực hiện luồng học theo phiên bản đã giao, F08 thực hiện bài kiểm tra và xét hoàn thành (AC-08). Tra cứu trong tệp PDF/Word thuộc FR-04.09.
 - **Giai đoạn 3:** nối FR-04.08 với FR-10.07 để hạng mục bàn giao được đánh dấu chuyển thành Nháp tri thức. F11 mở rộng thông báo sau phần thông báo từ chối cần cho AC-04.
 - **Giai đoạn 4:** FR-01.04 và FR-01.05 cung cấp bộ mẫu và quy trình phát hành. FR-05.09 dùng liên kết từ T17 để liệt kê, so sánh và áp dụng cập nhật theo khóa học, module hoặc bài học. Kiểm thử AC-13 phải xác nhận cập nhật một module chỉ thay đổi module đó, tạo Nháp cần duyệt và giữ mục tùy chỉnh khi chọn Giữ.

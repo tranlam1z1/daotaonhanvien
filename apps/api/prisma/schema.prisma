@@ -88,6 +88,7 @@ model Plan {
 }
 
 model Tenant {
+  assignmentRules AssignmentRule[]
   id              String           @id @default(uuid()) @db.Uuid
   tenantId        String           @unique @map("tenant_id") @db.Uuid
   name            String
@@ -119,8 +120,14 @@ model Tenant {
   trainingCourses TrainingCourse[]
   trainingModules TrainingModule[]
   trainingLessons TrainingLesson[]
+  enrollments Enrollment[]
+  lessonProgress LessonProgress[]
+  quizAttempts QuizAttempt[]
+  practiceResults PracticeResult[]
+  courseSurveyResponses CourseSurveyResponse[]
   programCourses ProgramCourse[]
   quizzes Quiz[]
+  assessmentQuestions AssessmentQuestion[]
   knowledgeAttachments KnowledgeAttachment[]
   knowledgeRejections KnowledgeRejection[]
 
@@ -180,6 +187,7 @@ model Payment {
 }
 
 model Department {
+  assignmentRules AssignmentRule[]
   id       String       @id @default(uuid()) @db.Uuid
   tenantId String       @map("tenant_id") @db.Uuid
   tenant   Tenant       @relation(fields: [tenantId], references: [id])
@@ -192,6 +200,7 @@ model Department {
   trainingPrograms TrainingProgram[]
   trainingCourses TrainingCourse[]
   quizzes Quiz[]
+  assessmentQuestions AssessmentQuestion[]
 
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   createdBy String?   @map("created_by") @db.Uuid
@@ -205,6 +214,7 @@ model Department {
 }
 
 model Position {
+  assignmentRules AssignmentRule[]
   id       String       @id @default(uuid()) @db.Uuid
   tenantId String       @map("tenant_id") @db.Uuid
   tenant   Tenant       @relation(fields: [tenantId], references: [id])
@@ -251,6 +261,8 @@ model User {
   auditLogs             AuditLog[]
   knowledgeRejections   KnowledgeRejection[]
   trainingRejections TrainingRejection[]
+  enrollments Enrollment[] @relation("EnrollmentLearner")
+  assignedEnrollments Enrollment[] @relation("EnrollmentAssigner")
   authCredentials       AuthCredential[] @relation("CredentialUser")
   scopedAuthCredentials AuthCredential[] @relation("CredentialScopedUser")
 
@@ -316,6 +328,7 @@ model FileObject {
   contentType String   @map("content_type")
   sizeBytes   BigInt   @map("size_bytes")
   storageKey  String   @unique @map("storage_key")
+  searchText  String?  @map("search_text")
   trainingLessons TrainingLesson[]
   knowledgeAttachments KnowledgeAttachment[]
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -489,6 +502,7 @@ enum TrainingLessonType {
 }
 
 model TrainingProgram {
+  assignmentRules AssignmentRule[]
   templateSource Json? @map("template_source")
   id String @id @default(uuid()) @db.Uuid
   tenantId String @map("tenant_id") @db.Uuid
@@ -508,12 +522,14 @@ model TrainingProgram {
   rejectionReason String? @map("rejection_reason")
   releases TrainingRelease[]
   courses ProgramCourse[]
+  enrollments Enrollment[]
 
   @@unique([tenantId, id])
   @@map("training_programs")
 }
 
 model TrainingCourse {
+  assignmentRules AssignmentRule[]
   templateSource Json? @map("template_source")
   id String @id @default(uuid()) @db.Uuid
   tenantId String @map("tenant_id") @db.Uuid
@@ -532,6 +548,9 @@ model TrainingCourse {
   releases TrainingRelease[]
   programs ProgramCourse[]
   modules TrainingModule[]
+  enrollments Enrollment[]
+
+  assessmentQuestions AssessmentQuestion[]
 
   @@unique([tenantId, id])
   @@map("training_courses")
@@ -547,10 +566,134 @@ model TrainingRelease {
   departmentId String? @map("department_id") @db.Uuid
   revision Int
   content Json
+  enrollments Enrollment[]
 
+  @@unique([tenantId, courseId, id], map: "training_releases_tenant_id_course_id_id_key")
   @@unique([tenantId, courseId, revision])
   @@unique([tenantId, programId, revision])
   @@map("training_releases")
+}
+
+enum EnrollmentStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  OVERDUE
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum EnrollmentSource {
+  MANUAL
+  AUTOMATIC
+}
+
+model Enrollment {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: NoAction)
+  userId String @map("user_id") @db.Uuid
+  user User @relation("EnrollmentLearner", fields: [tenantId, userId], references: [tenantId, id], onDelete: NoAction)
+  courseId String @map("course_id") @db.Uuid
+  course TrainingCourse @relation(fields: [tenantId, courseId], references: [tenantId, id], onDelete: NoAction)
+  courseVersionId String @map("course_version_id") @db.Uuid
+  courseVersion TrainingRelease @relation(fields: [tenantId, courseId, courseVersionId], references: [tenantId, courseId, id], onDelete: NoAction)
+  programId String? @map("program_id") @db.Uuid
+  program TrainingProgram? @relation(fields: [tenantId, programId], references: [tenantId, id], onDelete: NoAction)
+  ruleId String? @map("rule_id") @db.Uuid
+  rule AssignmentRule? @relation(fields: [tenantId, ruleId], references: [tenantId, id], onDelete: NoAction)
+  previousEnrollmentId String? @map("previous_enrollment_id") @db.Uuid
+  previousEnrollment Enrollment? @relation("ReassignedEnrollment", fields: [tenantId, userId, courseId, previousEnrollmentId], references: [tenantId, userId, courseId, id], onDelete: NoAction)
+  reassignedEnrollments Enrollment[] @relation("ReassignedEnrollment")
+  assignedById String? @map("assigned_by_id") @db.Uuid
+  assignedBy User? @relation("EnrollmentAssigner", fields: [tenantId, assignedById], references: [tenantId, id], onDelete: NoAction)
+  source EnrollmentSource
+  status EnrollmentStatus @default(NOT_STARTED)
+  progressPercent Int @default(0) @map("progress_percent")
+  assignedAt DateTime @default(now()) @map("assigned_at") @db.Timestamptz(3)
+  dueAt DateTime @map("due_at") @db.Timestamptz(3)
+  startedAt DateTime? @map("started_at") @db.Timestamptz(3)
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  progressInheritedAt DateTime? @map("progress_inherited_at") @db.Timestamptz(3)
+  lessons LessonProgress[]
+  quizAttempts QuizAttempt[]
+  practice PracticeResult?
+  survey CourseSurveyResponse?
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, userId, courseId, id], map: "enrollments_tenant_user_course_id_key")
+  @@index([tenantId, userId, dueAt])
+  @@index([tenantId, courseId, status])
+  @@map("enrollments")
+}
+
+model LessonProgress {
+  tenantId String @map("tenant_id") @db.Uuid
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: NoAction)
+  enrollmentId String @map("enrollment_id") @db.Uuid
+  enrollment Enrollment @relation(fields: [tenantId, enrollmentId], references: [tenantId, id], onDelete: Cascade)
+  lessonId String @map("lesson_id") @db.Uuid
+  resumePosition Float? @map("resume_position")
+  videoDuration Float? @map("video_duration")
+  quizScore Float? @map("quiz_score")
+  watchedSegments Json @default("[]") @map("watched_segments")
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@id([tenantId, enrollmentId, lessonId])
+  @@map("lesson_progress")
+}
+
+model QuizAttempt {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: NoAction)
+  enrollmentId String @map("enrollment_id") @db.Uuid
+  enrollment Enrollment @relation(fields: [tenantId, enrollmentId], references: [tenantId, id], onDelete: Cascade)
+  lessonId String @map("lesson_id") @db.Uuid
+  number Int
+  questions Json
+  answers Json @default("{}")
+  passingScore Int @map("passing_score")
+  showAnswers Boolean @map("show_answers")
+  startedAt DateTime @map("started_at") @db.Timestamptz(3)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(3)
+  submittedAt DateTime? @map("submitted_at") @db.Timestamptz(3)
+  score Float?
+  passed Boolean?
+
+  @@unique([tenantId, enrollmentId, lessonId, number], map: "quiz_attempts_lesson_number_key")
+  @@map("quiz_attempts")
+}
+
+model PracticeResult {
+  tenantId String @map("tenant_id") @db.Uuid
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: NoAction)
+  enrollmentId String @map("enrollment_id") @db.Uuid
+  enrollment Enrollment @relation(fields: [tenantId, enrollmentId], references: [tenantId, id], onDelete: Cascade)
+  confirmedById String @map("confirmed_by_id") @db.Uuid
+  passed Boolean
+  comment String
+  confirmedAt DateTime @map("confirmed_at") @db.Timestamptz(3)
+
+  @@id([tenantId, enrollmentId])
+  @@unique([tenantId, enrollmentId], map: "practice_results_enrollment_key")
+  @@map("practice_results")
+}
+
+model CourseSurveyResponse {
+  tenantId String @map("tenant_id") @db.Uuid
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: NoAction)
+  enrollmentId String @map("enrollment_id") @db.Uuid
+  enrollment Enrollment @relation(fields: [tenantId, enrollmentId], references: [tenantId, id], onDelete: Cascade)
+  ratings Json
+  feedback String
+  submittedAt DateTime @default(now()) @map("submitted_at") @db.Timestamptz(3)
+
+  @@id([tenantId, enrollmentId])
+  @@unique([tenantId, enrollmentId], map: "course_survey_responses_enrollment_key")
+  @@map("course_survey_responses")
 }
 
 model TrainingRejection {
@@ -630,6 +773,89 @@ model Quiz {
   name String
   lessons TrainingLesson[]
 
+  selectionMode QuizSelectionMode? @map("selection_mode")
+  randomCount Int? @map("random_count")
+  timeLimitMinutes Int? @map("time_limit_minutes")
+  passingScore Int? @map("passing_score")
+  maxAttempts Int? @map("max_attempts")
+  shuffleQuestions Boolean @default(false) @map("shuffle_questions")
+  shuffleOptions Boolean @default(false) @map("shuffle_options")
+  showAnswers Boolean @default(false) @map("show_answers")
+  questions QuizQuestion[]
+
   @@unique([tenantId, id])
   @@map("quizzes")
+}
+
+enum AssessmentQuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+}
+
+enum QuizSelectionMode {
+  FIXED
+  RANDOM
+}
+
+model AssessmentQuestion {
+  id             String                 @id @default(uuid()) @db.Uuid
+  tenantId       String                 @map("tenant_id") @db.Uuid
+  tenant         Tenant                 @relation(fields: [tenantId], references: [id])
+  departmentId   String?                @map("department_id") @db.Uuid
+  department     Department?            @relation(fields: [tenantId, departmentId], references: [tenantId, id], onDelete: NoAction)
+  courseId       String?                @map("course_id") @db.Uuid
+  course         TrainingCourse?        @relation(fields: [tenantId, courseId], references: [tenantId, id], onDelete: NoAction)
+  topic          String?
+  type           AssessmentQuestionType
+  prompt         String
+  options        String[]
+  correctOptions Int[]                  @map("correct_options")
+  explanation    String
+  quizzes        QuizQuestion[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId, departmentId])
+  @@index([tenantId, courseId])
+  @@map("assessment_questions")
+}
+
+model QuizQuestion {
+  tenantId   String             @map("tenant_id") @db.Uuid
+  quizId     String             @map("quiz_id") @db.Uuid
+  questionId String             @map("question_id") @db.Uuid
+  position   Int
+  quiz       Quiz               @relation(fields: [tenantId, quizId], references: [tenantId, id], onDelete: Cascade)
+  question   AssessmentQuestion @relation(fields: [tenantId, questionId], references: [tenantId, id], onDelete: Restrict)
+
+  @@id([tenantId, quizId, questionId])
+  @@unique([tenantId, quizId, position])
+  @@index([tenantId, questionId])
+  @@map("quiz_questions")
+}
+
+model AssignmentRule {
+  id String @id @default(uuid()) @db.Uuid
+  tenantId String @map("tenant_id") @db.Uuid
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  name String
+  courseId String? @map("course_id") @db.Uuid
+  course TrainingCourse? @relation(fields: [tenantId, courseId], references: [tenantId, id], onDelete: NoAction)
+  programId String? @map("program_id") @db.Uuid
+  program TrainingProgram? @relation(fields: [tenantId, programId], references: [tenantId, id], onDelete: NoAction)
+  departmentId String? @map("department_id") @db.Uuid
+  department Department? @relation(fields: [tenantId, departmentId], references: [tenantId, id], onDelete: NoAction)
+  positionId String? @map("position_id") @db.Uuid
+  position Position? @relation(fields: [tenantId, positionId], references: [tenantId, id], onDelete: NoAction)
+  newHireDays Int? @map("new_hire_days")
+  dueDays Int @map("due_days")
+  scopeDepartmentIds String[] @default([]) @map("scope_department_ids") @db.Uuid
+  enabled Boolean @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  enrollments Enrollment[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId, enabled])
+  @@map("assignment_rules")
 }

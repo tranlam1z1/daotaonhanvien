@@ -8,6 +8,7 @@ import {
   KnowledgeService,
 } from '../knowledge/knowledge.service';
 import { readConfig } from '../organization/organization-input';
+import { snapshotQuizzes, type QuizDefinitions } from '../learning/quiz-policy';
 import { TenantDatabase } from '../tenant/tenant-database';
 import { TrainingService } from './training.service';
 import {
@@ -221,7 +222,7 @@ export class TrainingApprovalService {
       ...release,
       content: release.content as unknown as Awaited<
         ReturnType<TrainingService['courseSnapshot']>
-      >,
+      > & { quizDefinitions?: QuizDefinitions },
     };
   }
 
@@ -311,6 +312,19 @@ export class TrainingApprovalService {
     });
   }
 
+  private async releaseSnapshot(record: WorkingCopy, kind: TrainingKind) {
+    const content = await this.snapshot(record, kind);
+    if (!('modules' in content)) return content;
+    const ids = content.modules.flatMap(({ lessons }) =>
+      lessons.flatMap(({ quizId }) => (quizId ? [quizId] : [])),
+    );
+    if (!ids.length) return content;
+    return {
+      ...content,
+      quizDefinitions: await snapshotQuizzes(this.db, record.tenantId, ids),
+    };
+  }
+
   private async recordDecision(
     actor: SessionIdentity,
     record: WorkingCopy,
@@ -341,7 +355,7 @@ export class TrainingApprovalService {
           ...releaseTarget(kind, record.id),
           departmentId: record.departmentId,
           revision: record.revision,
-          content: await this.snapshot(record, kind),
+          content: await this.releaseSnapshot(record, kind),
         },
       });
     }

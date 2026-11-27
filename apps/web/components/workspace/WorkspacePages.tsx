@@ -2,10 +2,15 @@
 
 import Link from 'next/link';
 import { availableSections } from '../../lib/workspace';
+import Assessments from '../assessments/Assessments';
+import { Assignments } from '../assignments/Assignments';
 import { Employees } from '../employees/Employees';
 import { Knowledge } from '../knowledge/Knowledge';
 import { KnowledgeLibrary } from '../knowledge/KnowledgeLibrary';
 import { KnowledgeReviews } from '../knowledge/KnowledgeReviews';
+import { Learning } from '../learning/Learning';
+import { Practice } from '../learning/Practice';
+import { SurveyTemplate } from '../learning/CourseSurvey';
 import { Organization } from '../organization/Organization';
 import { PlatformCompanies } from '../platform/PlatformCompanies';
 import { PlatformLeads } from '../platform/PlatformLeads';
@@ -76,6 +81,20 @@ export function WorkspaceSection({
         </>
       ) : slug === 'dao-tao' ? (
         <Training />
+      ) : slug === 'hoc-tap' ? (
+        <Learning />
+      ) : slug === 'phan-bo' ? (
+        <Assignments />
+      ) : slug === 'danh-gia' ? (
+        <>
+          <Assessments />
+          {permissions.some(
+            ({ permission, scope }) =>
+              permission === 'assessments.manage' && scope === 'tenant',
+          ) && <SurveyTemplate />}
+        </>
+      ) : slug === 'thuc-hanh' ? (
+        <Practice />
       ) : slug === 'to-chuc' ? (
         <Organization
           editable={permissions.some(

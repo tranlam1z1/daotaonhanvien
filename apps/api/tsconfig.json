@@ -5,7 +5,12 @@
     "moduleResolution": "Node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "allowJs": true,
     "outDir": "dist"
   },
-  "include": ["src/**/*.ts", "prisma/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/files/document-text.worker.mjs",
+    "prisma/**/*.ts"
+  ]
 }

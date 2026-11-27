@@ -11,6 +11,7 @@ import type { Prisma } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { can, type SessionIdentity } from '../auth/permissions';
 import { TenantDatabase } from '../tenant/tenant-database';
+import { extractDocumentText } from './document-text';
 import { uploadScope } from './file-access';
 import {
   bytesPerStorageGb,
@@ -47,6 +48,7 @@ export class FilesService {
     await this.database.run(tenantId, () =>
       this.checkQuota(tenantId, metadata.sizeBytes),
     );
+    const searchText = await extractDocumentText(file.path, metadata);
 
     const id = randomUUID();
     const storageKey = `${tenantId}/${id}`;
@@ -73,7 +75,14 @@ export class FilesService {
         await this.checkUploader(actor.id, tenantId, departmentId);
         await this.checkQuota(tenantId, metadata.sizeBytes);
         const record = await db.fileObject.create({
-          data: { ...metadata, id, tenantId, storageKey, createdBy: actor.id },
+          data: {
+            ...metadata,
+            id,
+            tenantId,
+            storageKey,
+            searchText,
+            createdBy: actor.id,
+          },
           select: publicFields,
         });
         await db.tenant.update({
@@ -111,6 +120,7 @@ export class FilesService {
       db: Prisma.TransactionClient,
       actor: SessionIdentity,
     ) => Promise<string | null>,
+    disposition: 'attachment' | 'inline' = 'attachment',
   ) {
     const notFound = () => new NotFoundException('Không tìm thấy tệp.');
     if (!actor.tenantId) throw notFound();
@@ -123,7 +133,11 @@ export class FilesService {
     });
     if (!file) throw notFound();
     try {
-      return await this.storage.signDownload(file);
+      return await (disposition === 'inline' &&
+      (file.contentType === 'application/pdf' ||
+        file.contentType.startsWith('video/'))
+        ? this.storage.signDownload(file, disposition)
+        : this.storage.signDownload(file));
     } catch {
       throw new ServiceUnavailableException(
         'Không thể cấp đường dẫn tải tệp. Vui lòng thử lại.',

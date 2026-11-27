@@ -61,7 +61,7 @@ export const workspaceSections = [
     label: 'Kiểm tra và khảo sát',
     permission: 'assessments.manage',
   },
-  { slug: 'hoc-tap', label: 'Học tập', permission: 'learning.use' },
+  { slug: 'hoc-tap', label: 'Việc học của tôi', permission: 'learning.use' },
   {
     slug: 'thuc-hanh',
     label: 'Xác nhận thực hành',

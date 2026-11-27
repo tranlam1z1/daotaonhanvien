@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { argon2id, hash } from 'argon2';
+import { AssignmentRulesService } from '../assignments/assignment-rules.service';
 import { newSecret } from '../auth/auth-policy';
 import { TenantDatabase } from '../tenant/tenant-database';
 import {
@@ -51,6 +52,8 @@ const quotaMessage =
 export class EmployeeService {
   constructor(
     @Inject(TenantDatabase) private readonly database: TenantDatabase,
+    @Inject(AssignmentRulesService)
+    private readonly assignmentRules: AssignmentRulesService,
   ) {}
   private get db() {
     return this.database.client;
@@ -101,7 +104,7 @@ export class EmployeeService {
       throw new NotFoundException('Không tìm thấy nhân viên.');
     this.validate(data, directory, await this.employeeKeys(actor), current);
     if (!current) {
-      return this.db.user.create({
+      const employee = await this.db.user.create({
         data: {
           ...data,
           tenantId: actor.tenantId,
@@ -120,6 +123,8 @@ export class EmployeeService {
         },
         select: fields,
       });
+      await this.assignmentRules.employeesChanged(actor, [employee.id]);
+      return employee;
     }
     const employee = await this.db.user.update({
       where: { id: current.id },
@@ -130,6 +135,11 @@ export class EmployeeService {
       await this.db.authCredential.deleteMany({
         where: { userId: current.id, kind: { in: ['RESET', 'INVITE'] } },
       });
+    if (
+      current.departmentId !== employee.departmentId ||
+      current.positionId !== employee.positionId
+    )
+      await this.assignmentRules.employeesChanged(actor, [employee.id]);
     return employee;
   }
 
@@ -194,6 +204,10 @@ export class EmployeeService {
         updatedBy: actor.id,
       })),
     });
+    await this.assignmentRules.employeesChanged(
+      actor,
+      users.map(({ id }) => id),
+    );
     return { rows: rows.length, errors, imported: users.length };
   }
 

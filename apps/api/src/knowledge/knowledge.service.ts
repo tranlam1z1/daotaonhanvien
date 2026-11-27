@@ -13,6 +13,7 @@ import {
   permissionProfile,
   type SessionIdentity,
 } from '../auth/permissions';
+import { normalizeSearchText } from '../files/document-text';
 import { attachableFileWhere } from '../files/file-access';
 import { FilesService } from '../files/files.service';
 import { readConfig } from '../organization/organization-input';
@@ -619,26 +620,50 @@ export class KnowledgeService {
         orderBy: { name: 'asc' },
       }),
     ]);
-    const keyword = this.searchValue(filters.keyword);
-    const articles = items.flatMap(({ versions: [version] }) => {
+    const keyword = normalizeSearchText(filters.keyword);
+    const visible = items.flatMap(({ versions: [version] }) => {
       if (
         !this.readerCanSee(reader, version) ||
         (filters.categoryId && version.categoryId !== filters.categoryId) ||
         (filters.tagId && !version.tagIds.includes(filters.tagId)) ||
         (filters.departmentId &&
           (version.audience !== 'DEPARTMENTS' ||
-            !version.departmentIds.includes(filters.departmentId))) ||
-        (keyword &&
-          ![
-            version.title,
-            version.summary,
-            knowledgeText(version.bodyHtml),
-          ].some((value) => this.searchValue(value).includes(keyword)))
+            !version.departmentIds.includes(filters.departmentId)))
       )
         return [];
-      const { itemId, title, summary, updatedAt } = version;
-      return [{ itemId, title, summary, updatedAt }];
+      return [version];
     });
+    const textMatches = new Set(
+      visible
+        .filter(
+          (version) =>
+            !keyword ||
+            [
+              version.title,
+              version.summary,
+              knowledgeText(version.bodyHtml),
+            ].some((value) => normalizeSearchText(value).includes(keyword)),
+        )
+        .map(({ id }) => id),
+    );
+    const versionsToSearch = visible
+      .filter(({ id }) => !textMatches.has(id))
+      .map(({ id }) => id);
+    if (versionsToSearch.length) {
+      const hits = await this.db.$queryRaw<{ versionId: string }[]>`
+        SELECT DISTINCT a.version_id AS "versionId"
+        FROM knowledge_attachments a
+        JOIN file_objects f ON f.id = a.file_id AND f.tenant_id = a.tenant_id
+        WHERE a.tenant_id = ${tenantId}::uuid
+          AND a.version_id = ANY(${versionsToSearch}::uuid[])
+          AND strpos(f.search_text, ${keyword}) > 0
+      `;
+      for (const { versionId } of hits) textMatches.add(versionId);
+    }
+    const articles = visible.flatMap(
+      ({ id, itemId, title, summary, updatedAt }) =>
+        textMatches.has(id) ? [{ itemId, title, summary, updatedAt }] : [],
+    );
     articles.sort(
       (a, b) =>
         b.updatedAt.getTime() - a.updatedAt.getTime() ||
@@ -816,10 +841,6 @@ export class KnowledgeService {
       videoUrl,
       attachments,
     };
-  }
-
-  private searchValue(value: string) {
-    return value.normalize('NFC').toLocaleLowerCase('vi');
   }
 
   async readableTitles(actor: SessionIdentity, ids?: string[]) {

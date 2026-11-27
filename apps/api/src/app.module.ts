@@ -1,11 +1,14 @@
 import { Controller, Get, Module } from '@nestjs/common';
 import type { HealthResponse } from '@educore36/shared';
+import { AssessmentsModule } from './assessments/assessments.module';
+import { AssignmentsModule } from './assignments/assignments.module';
 import { AuthModule } from './auth/auth.module';
 import { EmployeeController } from './employees/employee.controller';
 import { EmployeeService } from './employees/employee.service';
 import { EmployeeQuotaMailer } from './employees/employee-quota';
 import { FilesModule } from './files/files.module';
 import { KnowledgeModule } from './knowledge/knowledge.module';
+import { LearningModule } from './learning/learning.module';
 import { LeadsController } from './leads/leads.controller';
 import { LeadInfrastructure } from './leads/leads.infrastructure';
 import { OrganizationController } from './organization/organization.controller';
@@ -22,7 +25,16 @@ export class HealthController {
   }
 }
 @Module({
-  imports: [TenantModule, AuthModule, FilesModule, KnowledgeModule, TrainingModule],
+  imports: [
+    TenantModule,
+    AuthModule,
+    FilesModule,
+    KnowledgeModule,
+    TrainingModule,
+    LearningModule,
+    AssessmentsModule,
+    AssignmentsModule,
+  ],
   controllers: [
     HealthController,
     LeadsController,
