@@ -10,7 +10,8 @@
     "test": "jest --runInBand",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
-    "auth:invite": "tsx prisma/invite.ts"
+    "auth:invite": "tsx prisma/invite.ts",
+    "files:backfill-search": "tsx prisma/backfill-file-search.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1178.0",
@@ -29,6 +30,9 @@
     "parse5": "7.3.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "saxes": "6.0.0",
+    "unpdf": "2.2.3",
+    "word-extractor": "1.0.4",
     "yauzl": "3.2.0"
   },
   "devDependencies": {

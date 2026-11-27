@@ -63,7 +63,12 @@ export function KnowledgeLibrary() {
       >
         <label className="block text-sm font-semibold">
           Từ khóa
-          <input className={inputStyle} name="q" maxLength={200} />
+          <input
+            className={inputStyle}
+            name="q"
+            maxLength={200}
+            placeholder="Tìm trong bài viết và tệp PDF, Word"
+          />
         </label>
         <div className="grid gap-3 sm:grid-cols-3">
           <Filter

@@ -11,6 +11,7 @@ import { webOrigin } from '../auth/auth-policy';
 import { ObjectStorage } from '../files/object-storage';
 
 import { TenantDatabase } from '../tenant/tenant-database';
+import { textDocx, textPdf } from '../testing/document-fixtures';
 import {
   createTenantFixture,
   removeTenantFixture,
@@ -26,12 +27,14 @@ integration('T13 knowledge library and archive', () => {
     url: 'https://storage.example.test/attachment',
     expiresIn: 300,
   });
+  const upload = jest.fn().mockResolvedValue(undefined);
   let app: INestApplication;
   let own: Awaited<ReturnType<typeof createTenantFixture>>;
   let other: typeof own;
   let admin: string;
   let employee: string;
   let trainer: string;
+  let planId: string | undefined;
 
   function api(
     method: 'get' | 'patch' | 'post' | 'delete',
@@ -88,6 +91,7 @@ integration('T13 knowledge library and archive', () => {
   async function attach(
     version: Awaited<ReturnType<typeof createVersion>>,
     fixture = own,
+    searchText?: string,
   ) {
     const id = randomUUID();
     const file = await root.fileObject.create({
@@ -99,6 +103,7 @@ integration('T13 knowledge library and archive', () => {
         contentType: 'application/pdf',
         sizeBytes: 42n,
         storageKey: fixture.tenantId + '/' + id,
+        searchText,
       },
     });
     await root.knowledgeAttachment.create({
@@ -127,7 +132,7 @@ integration('T13 knowledge library and archive', () => {
       imports: [KnowledgeModule],
     })
       .overrideProvider(ObjectStorage)
-      .useValue({ signDownload })
+      .useValue({ signDownload, upload })
       .compile();
     app = module.createNestApplication();
     await app.init();
@@ -152,6 +157,7 @@ integration('T13 knowledge library and archive', () => {
         await root.fileObject.deleteMany({ where });
         await removeTenantFixture(root, fixture.tenantId);
       }
+      if (planId) await root.plan.delete({ where: { id: planId } });
     } finally {
       await app?.close();
       await root.$disconnect();
@@ -237,6 +243,96 @@ integration('T13 knowledge library and archive', () => {
     ).toEqual([]);
     await api('get', '/read').query({ tagId: 'invalid' }).expect(400);
   });
+
+  it('finds terms in uploaded attachments of the current visible publication only', async () => {
+    const tenantId = own.tenantId;
+    const plan = await root.plan.create({
+      data: {
+        name: 'Gói T22',
+        maxAccounts: 10,
+        storageGb: 1,
+        price: 0,
+        cycle: 'MONTHLY',
+      },
+    });
+    planId = plan.id;
+    await root.subscription.create({
+      data: {
+        tenantId,
+        planId,
+        startsAt: new Date(),
+        endsAt: new Date('2099-01-01'),
+      },
+    });
+    const visible = await createVersion(own, 'PUBLISHED', {
+      audience: 'DEPARTMENTS',
+      departmentIds: [own.department.id],
+    });
+    for (const [bytes, filename] of [
+      [textPdf, 'quy-trinh.pdf'],
+      [textDocx, 'dao-tao.docx'],
+    ] as const) {
+      const response = await request(app.getHttpServer())
+        .post('/files')
+        .set('Origin', webOrigin())
+        .set('Cookie', admin)
+        .attach('file', bytes, filename)
+        .expect(201);
+      expect(response.body).not.toHaveProperty('searchText');
+      await root.knowledgeAttachment.create({
+        data: { tenantId, versionId: visible.id, fileId: response.body.id },
+      });
+    }
+
+    const unrelatedDepartment = await root.department.create({
+      data: { tenantId, name: 'Ngoài phạm vi T22' },
+    });
+    for (const version of [
+      await createVersion(own, 'PUBLISHED', {
+        audience: 'DEPARTMENTS',
+        departmentIds: [unrelatedDepartment.id],
+      }),
+      await createVersion(own, 'ARCHIVED'),
+      await createVersion(own, 'DRAFT', {
+        itemId: visible.itemId,
+        revision: 2,
+      }),
+    ]) {
+      await attach(version, own, 'pdf search 90%_ ready bản riêng');
+    }
+    const older = await createVersion(own, 'ARCHIVED');
+    await attach(older, own, 'pdf search 90%_ ready bản riêng');
+    await createVersion(own, 'PUBLISHED', {
+      itemId: older.itemId,
+      revision: 2,
+    });
+    await attach(
+      await createVersion(other, 'PUBLISHED'),
+      other,
+      'pdf search 90%_ ready bản riêng',
+    );
+    await attach(await createVersion(own, 'PUBLISHED')); // Missing index.
+
+    for (const q of ['PDF SEARCH 90%_', 'CẨM NANG ĐÀO TẠO']) {
+      const result = await api('get', '/read')
+        .query({ q, departmentId: own.department.id, tenantId: other.tenantId })
+        .expect(200);
+      expect(result.body.articles).toEqual([
+        {
+          itemId: visible.itemId,
+          title: 'Vận hành',
+          summary: '',
+          updatedAt: expect.any(String),
+        },
+      ]);
+      const allDepartments = await api('get', '/read').query({ q }).expect(200);
+      expect(allDepartments.body.articles).toEqual(result.body.articles);
+    }
+    for (const q of ['bản riêng', '90%X', 'xử lý không tồn tại']) {
+      const result = await api('get', '/read').query({ q }).expect(200);
+      expect(result.body.articles).toEqual([]);
+    }
+  }, 15_000);
 
   it('makes approval visible immediately on the list and by ID', async () => {
     const query = { q: 'Nghiệm thu tức thời' };

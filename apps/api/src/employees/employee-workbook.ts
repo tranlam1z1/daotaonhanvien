@@ -1,11 +1,10 @@
 import { BadRequestException } from '@nestjs/common';
 import { Workbook, type CellValue } from 'exceljs';
-import { fromBuffer } from 'yauzl';
+import { checkWorkbookZip } from '../spreadsheets/workbook-zip';
 import { employeeColumns, type EmployeeField } from './employee-input';
 
 const columns = Object.keys(employeeColumns) as EmployeeField[];
 export const employeeUploadLimit = 2 * 1024 * 1024;
-const workbookExpandedLimit = 16 * 1024 * 1024;
 const rowLimit = 2000;
 
 export async function employeeTemplate(catalogs: {
@@ -52,46 +51,6 @@ export async function employeeTemplate(catalogs: {
   return Buffer.from(await workbook.xlsx.writeBuffer());
 }
 
-async function checkZip(buffer: Buffer) {
-  // Check the expanded size before ExcelJS loads the archive into memory.
-  await new Promise<void>((resolve, reject) => {
-    fromBuffer(buffer, { lazyEntries: true }, (error, zip) => {
-      if (error || !zip) return reject(error);
-      let expanded = 0;
-      zip.on('error', reject);
-      zip.on('end', resolve);
-      if (zip.entryCount > 200) {
-        zip.close();
-        reject(new Error('Too many archive entries'));
-        return;
-      }
-      zip.on('entry', (entry) => {
-        expanded += entry.uncompressedSize;
-        if (expanded > workbookExpandedLimit) {
-          zip.close();
-          reject(new Error('Expanded workbook is too large'));
-          return;
-        }
-        // Stream each entry so the archive reader verifies its declared size.
-        zip.openReadStream(entry, (entryError, stream) => {
-          if (entryError || !stream) {
-            zip.close();
-            reject(entryError);
-            return;
-          }
-          stream.on('error', (streamError) => {
-            zip.close();
-            reject(streamError);
-          });
-          stream.on('end', () => zip.readEntry());
-          stream.resume();
-        });
-      });
-      zip.readEntry();
-    });
-  });
-}
-
 function cellInput(value: CellValue, field: EmployeeField) {
   if (value instanceof Date && field === 'joinedAt')
     return value.toISOString().slice(0, 10);
@@ -107,7 +66,7 @@ export async function readEmployeeWorkbook(file?: Buffer) {
     throw new BadRequestException('Vui lòng chọn tệp Excel .xlsx tối đa 2 MB.');
   const workbook = new Workbook();
   try {
-    await checkZip(file);
+    await checkWorkbookZip(file);
     await workbook.xlsx.load(Uint8Array.from(file).buffer);
   } catch {
     throw new BadRequestException('Không đọc được tệp Excel .xlsx.');
