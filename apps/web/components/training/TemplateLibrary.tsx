@@ -8,6 +8,8 @@ import type { Editor, Label } from './training-data';
 
 type Release = {
   version: string;
+  industry: string;
+  positionGroup: string;
   program: Label & {
     courses: (Label & { modules: (Label & { lessons: Label[] })[] })[];
   };
@@ -43,7 +45,8 @@ export function TemplateLibrary({
   catalog: Editor;
   onCopied: (result: CopyResult) => void | Promise<void>;
 }) {
-  const [release, setRelease] = useState<Release | null>(null);
+  const [release, setRelease] = useState<Release[] | null>(null);
+  const [programId, setProgramId] = useState('');
   const [selection, setSelection] = useState('');
   const [departmentId, setDepartmentId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -55,8 +58,8 @@ export function TemplateLibrary({
     setBusy(true);
     try {
       setRelease(
-        await readResponse<Release>(
-          await fetch(endpoint, { credentials: 'include' }),
+        await readResponse<Release[]>(
+          await fetch(endpoint + '/releases', { credentials: 'include' }),
         ),
       );
     } catch (error) {
@@ -79,7 +82,7 @@ export function TemplateLibrary({
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ departmentId }),
+          body: JSON.stringify({ departmentId, programId }),
         }),
       );
       setMessage('Đã tạo bản nháp từ bộ mẫu.');
@@ -99,17 +102,36 @@ export function TemplateLibrary({
       {release ? (
         <form className="space-y-4" onSubmit={copy}>
           <Select
+            label="Bộ mẫu"
+            value={programId}
+            required
+            onChange={(event) => {
+              setProgramId(event.target.value);
+              setSelection('');
+            }}
+          >
+            <option value="">Chọn bộ mẫu</option>
+            {release.map((item) => (
+              <option key={item.version} value={item.program.id}>
+                {item.program.name} · {item.industry} · {item.positionGroup}
+              </option>
+            ))}
+          </Select>
+          <Select
             label="Mục mẫu đã phát hành"
             value={selection}
             required
             onChange={(event) => setSelection(event.target.value)}
           >
             <option value="">Chọn mục mẫu</option>
-            {options(release).map(({ key, label }) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
+            {release
+              .filter((item) => item.program.id === programId)
+              .flatMap(options)
+              .map(({ key, label }) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
           </Select>
           <Scope
             catalog={catalog}

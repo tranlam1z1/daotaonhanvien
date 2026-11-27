@@ -29,6 +29,19 @@ export class PlatformController {
     @Inject(PlatformService) private readonly platform: PlatformService,
   ) {}
 
+  @Get('summary')
+  @RequirePermission('platform.report.summary')
+  summary() {
+    return this.platform.summary();
+  }
+
+  @Get('audit')
+  @RequirePermission('platform.manage')
+  staffAudit(@Query() query: unknown) {
+    const before = authField(query, 'before', 36);
+    return this.platform.staffAudit(before ? uuid(before) : undefined);
+  }
+
   @Get('companies')
   @RequirePermission('platform.manage')
   companies() {

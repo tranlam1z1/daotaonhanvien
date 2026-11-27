@@ -321,6 +321,28 @@ T18, T21 và T22 có thể bắt đầu song song. T19 và T23 dùng chung cấu
 - Xem tiến độ, kết quả kiểm tra, khảo sát và trạng thái bàn giao theo quyền. Cùng truy vấn lọc được dùng cho màn hình và tệp Excel.
 - **Kiểm tra thủ công** tại **Báo cáo đào tạo**. Lọc phòng ban, khóa học và thời gian, đối chiếu lượt học với danh sách phân bổ, rồi xuất Excel và đối chiếu các dòng trong trang tính **Tiến độ**.
 
+## Giai đoạn 4 — Thương mại hóa
+
+### ☑ T30 — Quản lý và phát hành bộ mẫu
+
+**FR/AC:** FR-01.04, FR-01.05, FR-05.08, AC-01.
+
+- QTNT soạn cây chương trình, khóa học, module và bài học văn bản, phân loại theo ngành nghề và nhóm vị trí, quản lý ngân hàng câu hỏi và phát hành kèm ghi chú thay đổi.
+- **Kiểm tra thủ công** tại **Bộ mẫu**. Chọn bộ mẫu hội nhập, sửa một bài và phát hành. Dùng tài khoản ADM của doanh nghiệp đã sao chép bộ mẫu để kiểm tra chuông thông báo.
+
+### ☑ T31 — So sánh và áp dụng cập nhật bộ mẫu
+
+**FR/AC:** FR-05.09, AC-01, AC-13, BR-008, BR-014, D-12.
+
+- **Kiểm tra thủ công** tại **Đào tạo → Cập nhật từ bộ mẫu**. Chọn khóa học có liên kết bộ mẫu, mở so sánh ở cấp module và chọn **Giữ** hoặc **Thay**. Kiểm tra module bên cạnh và bản đã phát hành. Với **Tạo bản sao**, kiểm tra bản sao ở cấp đã chọn và bản gốc vẫn còn.
+- Mỗi lần áp dụng thay đổi vào khóa học tạo bản nháp qua quy trình duyệt đã có. Lựa chọn **Giữ** giữ cập nhật trong danh sách để xem lại.
+
+### ☑ T32 — Thống kê và nhật ký nền tảng
+
+**FR/AC:** FR-01.06, FR-01.07, AC-01.
+
+- **Kiểm tra thủ công** tại **Báo cáo nền tảng** bằng tài khoản QTNT. Kiểm tra số doanh nghiệp, tài khoản, dung lượng, thuê bao hết hạn trong 30 ngày và sự kiện phát hành bộ mẫu.
+
 ## Phụ thuộc theo giai đoạn
 
 - **Giai đoạn 3:** nối FR-04.08 với FR-10.07 để hạng mục bàn giao được đánh dấu chuyển thành Nháp tri thức. F11 mở rộng thông báo sau phần thông báo từ chối cần cho AC-04.

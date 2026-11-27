@@ -13,7 +13,9 @@ import { Practice } from '../learning/Practice';
 import { SurveyTemplate } from '../learning/CourseSurvey';
 import { Organization } from '../organization/Organization';
 import { PlatformCompanies } from '../platform/PlatformCompanies';
+import { PlatformOverview } from '../platform/PlatformOverview';
 import { PlatformLeads } from '../platform/PlatformLeads';
+import { PlatformTemplates } from '../training/PlatformTemplates';
 import { Training } from '../training/Training';
 import { TrainingReviews } from '../training/TrainingReviews';
 import { EmptyState } from '../ui/controls';
@@ -70,6 +72,8 @@ export function WorkspaceSection({
       </h1>
       {slug === 'doanh-nghiep' ? (
         <PlatformCompanies pilot={pilot} />
+      ) : slug === 'bao-cao-nen-tang' ? (
+        <PlatformOverview />
       ) : slug === 'dang-ky-pilot' ? (
         <PlatformLeads />
       ) : slug === 'nhan-vien' ? (
@@ -88,6 +92,14 @@ export function WorkspaceSection({
           </section>
           <TrainingReviews />
         </>
+      ) : slug === 'bo-mau' ? (
+        permissions.some(({ permission }) => permission === 'platform.manage') ? (
+          <PlatformTemplates />
+        ) : (
+          <Link href="/ung-dung/dao-tao" className="text-blue-700 underline">
+            Mở thư viện và bản cập nhật trong mục Đào tạo
+          </Link>
+        )
       ) : slug === 'dao-tao' ? (
         <Training />
       ) : slug === 'hoc-tap' ? (

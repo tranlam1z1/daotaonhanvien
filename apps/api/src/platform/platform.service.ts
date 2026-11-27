@@ -74,6 +74,60 @@ export class PlatformService {
     });
   }
 
+  async summary() {
+    const companies = await this.database.runPlatform(null, () =>
+      this.db.tenant.findMany({ where: { deletedAt: null }, select: { id: true } }),
+    );
+    const now = new Date();
+    const cutoff = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const total = {
+      companies: companies.length,
+      activeAccounts: 0,
+      storageBytes: 0n,
+      expiringSubscriptions: 0,
+    };
+    const batchSize = 8;
+    for (let index = 0; index < companies.length; index += batchSize) {
+      const rows = await Promise.all(companies.slice(index, index + batchSize).map(({ id }) =>
+        this.database.run(id, async () => {
+          const [tenant, accounts, expiring] = await Promise.all([
+            this.db.tenant.findUniqueOrThrow({ where: { id }, select: { storageUsedBytes: true } }),
+            this.db.user.count({ where: {
+              tenantId: id, deletedAt: null, status: { in: ['ACTIVE', 'HANDOVER'] },
+            } }),
+            this.db.subscription.count({ where: {
+              tenantId: id, deletedAt: null, status: 'ACTIVE', endsAt: { gte: now, lte: cutoff },
+            } }),
+          ]);
+          return { bytes: tenant.storageUsedBytes, accounts, expiring };
+        }),
+      ));
+      for (const row of rows) {
+        total.activeAccounts += row.accounts;
+        total.storageBytes += row.bytes;
+        total.expiringSubscriptions += row.expiring;
+      }
+    }
+    return { ...total, storageBytes: total.storageBytes.toString() };
+  }
+
+  staffAudit(before?: string) {
+    return this.database.runPlatform(null, async () => {
+      const rows = await this.db.auditLog.findMany({
+        where: { deletedAt: null },
+        ...(before ? { cursor: { id: before }, skip: 1 } : {}),
+        take: 51,
+        orderBy: [{ occurredAt: 'desc' }, { id: 'desc' }],
+        select: {
+          id: true, action: true, objectType: true, objectId: true, occurredAt: true,
+          user: { select: { fullName: true } }, tenant: { select: { name: true } },
+        },
+      });
+      const items = rows.slice(0, 50);
+      return { items, next: rows.length > 50 ? items[49].id : null };
+    });
+  }
+
   async createCompany(body: unknown, actor: Actor) {
     const { company, leadId, admin } = input.newCompanyInput(body);
     const id = randomUUID();

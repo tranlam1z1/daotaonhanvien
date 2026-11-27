@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Button, Input } from '../ui/controls';
 import { CourseForm } from './CourseForm';
 import { ProgramForm } from './ProgramForm';
+import { TemplateUpdates } from './TemplateUpdates';
 import { TemplateLibrary } from './TemplateLibrary';
 import { panel, SubmitActions } from './TrainingFields';
 import {
@@ -247,6 +248,7 @@ export function Training() {
       )}
       {!form && (
         <>
+          <TemplateUpdates catalog={catalog} onApplied={async () => setCatalog(await trainingRequest<Editor>())} />
           <TemplateLibrary
             catalog={catalog}
             onCopied={async () => setCatalog(await trainingRequest<Editor>())}
